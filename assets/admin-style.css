@@ -11,8 +11,9 @@
 }*/
 
 html body {
-  min-height: 90vh;
-  height: auto;
+  height: 93vh;
+  padding: 0;
+  margin: 0;
 }
 
 /* Hide useless admin elements */
