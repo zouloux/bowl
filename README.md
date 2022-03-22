@@ -41,7 +41,7 @@ Advanced CMS fields workflow on top of Wordplate for Wordpress.
 - **Bowl** needs `wpackagist-plugin/advanced-custom-fields-pro` and `wordplate/acf`
 - **Bowl** optionally uses `wpackagist-plugin/wp-multilang` as mutli lang plugin.
 
-Other plugins you should use with Bowl :
+Other plugins / packages you should use with Bowl :
 
 - `wordplate/mail`
 - `wpackagist-plugin/admin-ui-cleaner`
@@ -50,6 +50,7 @@ Other plugins you should use with Bowl :
 - `wpackagist-plugin/post-types-order`
 - `wpackagist-plugin/regenerate-thumbnails`
 - `wpackagist-plugin/wp-limit-login-attempts`
+- `kornrunner/blurhash` if you want to use Bowl's BlurHash capabilities. 
 
 ### Documentation
 

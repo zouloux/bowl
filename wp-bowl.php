@@ -2,16 +2,16 @@
 
 /**
  * Plugin Name:       Bowl
- * Plugin URI:        https://github.com/zouloux/wp-bowl
- * GitHub Plugin URI: https://github.com/zouloux/wp-bowl
+ * Plugin URI:        https://github.com/zouloux/bowl
+ * GitHub Plugin URI: https://github.com/zouloux/bowl
  * Description:       Advanced CMS fields workflow on top of Wordplate for Wordpress.
  * Author:            ZoulouX
  * Author URI: 		  https://zouloux.com
  * License:           MIT
  * License URI:       https://opensource.org/licenses/MIT
- * Text Domain:       wp-bowl
+ * Text Domain:       bowl
  * Domain Path:       /cms
- * Version:           1.0.0
+ * Version:           1.0.1
  * Copyright:         © 2022 Alexis Bouhet
  */
 
