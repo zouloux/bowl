@@ -1,0 +1,27 @@
+{
+	"name": "zouloux/bowl",
+	"description": "Advanced CMS fields workflow on top of Wordplate for Wordpress.",
+	"license": "MIT",
+	"type": "wordpress-plugin",
+	"keywords": [
+		"wordplate",
+		"wordpress",
+		"cms",
+		"acf",
+		"bowl",
+		"plugin"
+	],
+	"authors": [
+		{
+			"name": "Alexis Bouhet"
+		}
+	],
+	"require": {
+		"php": "^8.0"
+	},
+	"minimum-stability": "dev",
+	"prefer-stable": true,
+	"config": {
+		"preferred-install": "dist"
+	}
+}
