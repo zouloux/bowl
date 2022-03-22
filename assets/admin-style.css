@@ -12,6 +12,7 @@
 
 html body {
   min-height: 90vh;
+  height: auto;
 }
 
 /* Hide useless admin elements */
