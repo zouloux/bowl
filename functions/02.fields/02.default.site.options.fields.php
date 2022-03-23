@@ -35,7 +35,8 @@ function bowl_create_dictionaries_fields_group ( string $title = "Dictionaries" 
 function bowl_create_dictionaries_filter ( string $key ) {
 	return function ( $data ) use ( $key ) {
 		if ( !isset($data[ $key ]) )
-			throw new Exception("bowl_create_dictionaries_filter // Cannot find $key in data.");
+			return $data;
+		//			throw new Exception("bowl_create_dictionaries_filter // Cannot find $key in data.");
 		$dictionaries = $data[ $key ];
 		$newArray = [];
 		foreach ( $dictionaries as $dictionary ) {
@@ -71,7 +72,8 @@ function bowl_create_keys_fields_group ( string $title = "API and product keys" 
 function bowl_create_keys_filter ( string $key ) {
 	return function ( $data ) use ( $key ) {
 		if ( !isset($data[ $key ]) )
-			throw new Exception("bowl_create_keys_filter // Cannot find $key in data.");
+			return $data;
+		//			throw new Exception("bowl_create_keys_filter // Cannot find $key in data.");
 		$keys = $data[$key];
 		$newArray = [];
 		foreach ($keys as $associativeKeyValue)
@@ -142,7 +144,8 @@ function bowl_create_menu_fields_group ( string $id, string $title = "menu") {
 function bowl_create_menu_filter ( string $key ) {
 	return function ( $data ) use ( $key ) {
 		if ( !isset($data[ $key ]) )
-			throw new Exception("bowl_create_menu_filter // Cannot find $key in data.");
+			return $data;
+		//			throw new Exception("bowl_create_menu_filter // Cannot find $key in data.");
 		$menu = $data[$key];
 		$newArray = [];
 		// FIXME : Title not always working ? Href also ?
