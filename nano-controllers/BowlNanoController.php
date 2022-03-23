@@ -1,6 +1,7 @@
 <?php
 
 use Nano\core\Nano;
+use Nano\debug\NanoDebug;
 
 class BowlNanoController
 {
@@ -19,6 +20,21 @@ class BowlNanoController
 	function loadWordpress () {
 		require_once Nano::path('wordpress', 'wp-load.php');
 		$this->_isWordpressLoaded = true;
+		// Enable WP query profiling
+		if ( Nano::getEnv("NANO_DEBUG") && Nano::getEnv("NANO_PROFILE", false) ) {
+			define('SAVEQUERIES', true);
+			NanoDebug::addCustomTab("WP Queries", function () {
+				global $wpdb;
+				$buffer = "";
+				foreach ( $wpdb->queries as $query ) {
+					$initiator = implode(" < ", array_reverse(explode(",", $query[2])));
+					$queryContent = NanoDebug::dumpToString($query[0]);
+					$buffer .= "<h3 class='DebugBar_dumpTitle'>$initiator</h3>";
+					$buffer .= "<div class=''>$queryContent</div>";
+				}
+				return $buffer;
+			});
+		}
 
 		// Inject bowl twig helpers
 		if ( Nano::$renderer instanceof \Nano\renderers\twig\TwigRenderer ) {
