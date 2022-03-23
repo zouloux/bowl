@@ -314,9 +314,40 @@ body.wp-admin #wpcontent {
 #media-attachment-taxonomy-filter {
   display: none !important;
 }
-#adminmenu .toplevel_page_wcp_folders_settings {
+/* Override button colors */
+.wcp-container .plugin-button a {
+  border-color: #555;
+  background-color: #777;
+}
+.wcp-container .top-settings > .active-item,
+.wcp-container .top-settings > * > a.active-item {
+  background-color: #beebff !important;
+  color: black !important;
+}
+.wcp-container .top-settings .un-categorised-items.active-item a {
+  color: black !important;
+}
+.wcp-container .top-settings > .active-item:hover,
+.wcp-container .top-settings > * > a.active-item:hover {
+  background-color: #beebff !important;
+  color: black !important;
+}
+.wcp-container .top-settings *:hover {
+  background-color: unset;
+}
+/* Hide tray in folder sidebar */
+#wcp-content .wcp-hide-show-buttons {
   display: none;
 }
+/* Hide folder structure on top of attachments grid */
+#wp-media-grid .tree-structure-content {
+  display: none !important;
+}
+
+
+/*#adminmenu .toplevel_page_wcp_folders_settings {*/
+/*  display: none;*/
+/*}*/
 /* Hide last separator */
 #adminmenu .menu-icon-settings + .wp-menu-separator {
   display: none;
@@ -331,7 +362,7 @@ body.wp-admin #wpcontent {
 
 /* Clean articles columns */
 .wp-list-table .column-tags,
-/*.wp-list-table .column-author,*/
+  /*.wp-list-table .column-author,*/
 .wp-list-table .column-wpseo-title,
 .wp-list-table .column-wpseo-metadesc,
 .wp-list-table .column-wpseo-focuskw,

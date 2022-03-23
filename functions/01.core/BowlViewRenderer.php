@@ -1,5 +1,8 @@
 <?php
 
+// FIXME : To do when needed to render twig without Nano responders
+
+/*
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
 
@@ -34,4 +37,4 @@ class BowlViewRenderer
 		// TODO : Filter stream
 		return $stream;
 	}
-}
+}*/
