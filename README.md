@@ -1,4 +1,6 @@
-# Solid Chimera Starters
+# Starters
+
+### IMPORTANT : This project is still very xzWIP, use with caution
 
 ### Requirements
 
@@ -7,17 +9,16 @@
 - Node 14+
 - Git
 - Docker
-- PHP 7.4, not mandatory
 - Tested on Mac, should be working on Linux, never tested on Windows
 - Chimera client installed (`npm i -g @zouloux/chimera-client`)
 
 #### Chimera server
 - A [Chimera server](https://github.com/zouloux/chimera) configured and running
 
-## Create a new Solid / Chimera app
+## Init a new app
 
 ```shell
-npx https://github.com/zouloux/solid-chimera-starters
+npx https://github.com/zouloux/starters
 ```
 
 Then follow instructions.
@@ -31,27 +32,28 @@ rm -rf ~/.npm/_npx
 
 #### Clear saved preferences
 ```shell
-npx https://github.com/zouloux/solid-chimera-starters clear-preferences
+npx https://github.com/zouloux/starters clear-preferences
 ```
 
 ## Available back-ends
 
-### Wordpress
+### Bowl
 
+Bowl is a Wordpress starter with : 
+
+- Bowl CMS overlay
 - Wordplate
-- Docker Image : Debian / Apache / PHP 7.4
+- Using Docker Image : Debian / Apache / PHP 8.0
 - MariaDB as MySQL with Chimera service
-- ACF Pro
+- ACF Pro (required)
 - Pre-installed theme
 - Some utility plugins
 
 > You will need a valid ACF Pro key to procecess installation
 
-### Grav
-#### TODO ...
 
-### Node (find name)
-#### TODO ...
+### Nano
+
 
 ## Available front-ends
-#### TODO ...
+

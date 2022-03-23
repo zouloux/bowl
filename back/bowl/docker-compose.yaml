@@ -1,0 +1,24 @@
+version: "3.7"
+
+services:
+
+  lap :
+    image: "zouloux/docker-debian-apache-php:PHP8.0"
+    restart: "no"
+    container_name: "project_${COMPOSE_NAME}"
+    hostname: "${COMPOSE_HOSTNAME:-default}.chimera"
+    environment:
+      DDAP_LOGIN: ${DDAP_LOGIN:-}
+      DDAP_PASSWORD: ${DDAP_PASSWORD:-}
+      DDAP_DEVTOOLS: ${DDAP_DEVTOOLS:-}
+    networks:
+      - "chimera"
+    volumes:
+      - './:/root'
+      - "${CHIMERA_KEEP}/public/uploads:/root/public/uploads"
+      - "${CHIMERA_KEEP}/public/upgrade:/root/public/upgrade"
+      - "${CHIMERA_KEEP}/public/plugins:/root/public/plugins"
+
+networks:
+  chimera:
+    external: true

@@ -1,0 +1,79 @@
+
+# ------------------------------------------------------------------------------ BASIC
+
+# Disable directory listing
+Options -Indexes
+
+# Force UTF8 as default charset
+AddDefaultCharset utf-8
+
+# ------------------------------------------------------------------------------ CACHE CONTROL
+
+<IfModule mod_expires.c>
+	ExpiresActive On
+
+	AddType font/woff .woff
+	AddType image/x-icon .ico
+
+	# 2 hours for default and content
+	ExpiresDefault "access plus 7200 seconds"
+	ExpiresByType text/html "access plus 7200 seconds"
+	ExpiresByType application/xhtml+xml "access plus 7200 seconds"
+
+	# 7 days cache for all resources files
+	ExpiresByType image/jpg "access plus 604800 seconds"
+	ExpiresByType image/jpeg "access plus 604800 seconds"
+	ExpiresByType image/png "access plus 604800 seconds"
+	ExpiresByType image/gif "access plus 604800 seconds"
+	ExpiresByType image/ico "access plus 604800 seconds"
+	ExpiresByType image/icon "access plus 604800 seconds"
+	ExpiresByType image/x-icon "access plus 604800 seconds"
+	ExpiresByType text/css "access plus 604800 seconds"
+	ExpiresByType text/javascript "access plus 604800 seconds"
+	ExpiresByType application/javascript "access plus 604800 seconds"
+	ExpiresByType application/x-javascript "access plus 604800 seconds"
+	ExpiresByType font/woff "access plus 1 year"
+</IfModule>
+
+# ------------------------------------------------------------------------------ OPTIMISATIONS
+
+# Remove etags (file modified date asking by browsers)
+Header unset ETag
+FileETag none
+
+# ------------------------------------------------------------------------------ REWRITE
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+    # Here we write wordpress redirect before the "BEGIN Wordpre$$" bloc
+    # So it work on every env, even if Wordpress tries to updated it.
+    RewriteRule ^index\.php$ - [L]
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    # Everything else to Nano index
+    RewriteRule . index.php [L]
+</IfModule>
+
+# ------------------------------------------------------------------------------ WORDPRESS REWRITE
+
+# Here we block Wordpress rewrite rules
+<If "false">
+
+# BEGIN WordPress
+# The directives (lines) between "BEGIN WordPress" and "END WordPress" are
+# dynamically generated, and should only be modified via WordPress filters.
+# Any changes to the directives between these markers will be overwritten.
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+RewriteBase /
+RewriteRule ^index\.php$ - [L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /index.php [L]
+</IfModule>
+
+# END WordPress
+
+</If>

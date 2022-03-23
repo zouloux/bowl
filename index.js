@@ -140,6 +140,7 @@ let selectedBackend = false
 			defaultValue = preferences[ key ]
 		else if ( question.defaultValue && question.defaultValue.indexOf('$') === 0 )
 			defaultValue = answers[ question.defaultValue.substr(1, question.defaultValue.length) ]
+
 		// As input
 		if ( question.input ) {
 			answer = await askInput( question.input, {
@@ -152,6 +153,12 @@ let selectedBackend = false
 		// TODO
 		// else if ( question.list )
 		// 	await askList()
+
+		if ( question.check ) {
+			if ( !(await question.check( answer )) ) {
+				// TODO : Repeat question
+			}
+		}
 
 		// Save before filter
 		if ( question.save ) {

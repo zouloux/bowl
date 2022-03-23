@@ -1,0 +1,78 @@
+{
+	"name": "wordplate/wordplate",
+	"license": "MIT",
+	"require": {
+		"php": "^8.0",
+		"ext-json": "*",
+		"ext-zip": "*",
+		"twig/twig": "^3.3.8",
+		"wordplate/acf": "^11.2.0",
+		"wordplate/framework": "^11.0.0",
+		"wordplate/mail": "^7.3",
+		"wpackagist-plugin/admin-ui-cleaner": "^1.1.3",
+		"wpackagist-plugin/advanced-custom-fields-pro": "5.10.1",
+		"wpackagist-plugin/disable-comments": "^2.3.3",
+		"wpackagist-plugin/flamingo": "^2.2.3",
+		"wpackagist-plugin/post-types-order": "^1.9.8",
+		"wpackagist-plugin/regenerate-thumbnails": "^3.1.5",
+		"wpackagist-plugin/wp-limit-login-attempts": "^2.6.4",
+		"wpackagist-plugin/wp-multilang": "^2.4.1",
+		"zouloux/bowl": "^1.0",
+		"zouloux/nano": "^1.0"
+	},
+	"config": {
+		"optimize-autoloader": true,
+		"preferred-install": "dist",
+		"sort-packages": true
+	},
+	"extra": {
+		"installer-paths": {
+			"public/mu-plugins/{$name}": [
+				"type:wordpress-muplugin",
+				"wpackagist-plugin/admin-ui-cleaner",
+				"wpackagist-plugin/advanced-custom-fields-pro",
+				"wpackagist-plugin/disable-comments",
+				"wpackagist-plugin/hide-updates",
+				"wpackagist-plugin/post-types-order",
+				"wpackagist-plugin/wp-multilang",
+				"wpackagist-plugin/flamingo",
+				"wpackagist-plugin/regenerate-thumbnails",
+				"wpackagist-plugin/wp-limit-login-attempts",
+				"wordplate/mail",
+				"zouloux/bowl"
+			],
+			"public/plugins/{$name}": [
+				"type:wordpress-plugin"
+			],
+			"public/themes/{$name}": [
+				"type:wordpress-theme"
+			]
+		},
+		"wordpress-install-dir": "public/wordpress"
+	},
+	"repositories": [
+		{
+			"type": "composer",
+			"url": "https://wpackagist.org",
+			"only": [
+				"wpackagist-plugin/*",
+				"wpackagist-theme/*"
+			]
+		},
+		{
+			"type": "package",
+			"package": {
+				"name": "wpackagist-plugin/advanced-custom-fields-pro",
+				"type": "wordpress-plugin",
+				"version": "5.10.1",
+				"dist": {
+					"url": "https://connect.advancedcustomfields.com/v2/plugins/download?p=pro&k={{acfKey}}&t=5.10.1",
+					"type": "zip"
+				}
+			}
+		}
+	],
+	"require-dev": {
+		"symfony/var-dumper": "^5.1"
+	}
+}

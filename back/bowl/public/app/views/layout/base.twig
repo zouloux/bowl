@@ -1,0 +1,15 @@
+<html lang="{{ layout.header.lang }}">
+<head>
+    <meta charset="{{ layout.header.charset }}" />
+    <meta http-equiv="x-ua-compatible" content="IE=Edge" />
+    {% if viewport is defined %}
+        <meta name="viewport" content="{{ layout.header.viewport }}" />
+    {% else %}
+        <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=0" />
+    {% endif %}
+    <title>{{ layout.header.title }}</title>
+</head>
+<body>
+    {% include 'layout/body.twig' with { content : block('content') } %}
+</body>
+</html>

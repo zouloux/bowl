@@ -12,6 +12,7 @@
 		"@solid-js/cli": "^1.6.3",
 		"@solid-js/core": "^0.4.3",
 		"@solid-js/files": "^2.2.0",
+		"node-fetch": "^2.6.7",
 		"preferences": "^2.0.2"
 	}
 }

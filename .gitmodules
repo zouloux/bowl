@@ -1,3 +1,0 @@
-[submodule "back/wordpress/deploy/docker-debian-apache-php"]
-	path = back/wordpress/deploy/docker-debian-apache-php
-	url = https://github.com/zouloux/docker-debian-apache-php.git
