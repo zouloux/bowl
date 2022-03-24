@@ -29,6 +29,7 @@ class BowlPost
 
 	public int $id;
 	public int $timestamp;
+	public string $title;
 	public string $href;
 	public string $type;
 	public string $content;
@@ -47,6 +48,7 @@ class BowlPost
 		// Get post properties
 		$this->id = $post->ID;
 		$this->timestamp = (new \DateTime($post->post_date))->getTimestamp();
+		$this->title = $post->post_title;
 		$this->href = get_permalink( $post );
 		$this->type = $post->post_type;
 		$this->isPublished = $post->post_status == "publish";
