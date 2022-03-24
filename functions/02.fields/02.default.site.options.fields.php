@@ -42,8 +42,9 @@ function bowl_create_dictionaries_filter ( string $key ) {
 		foreach ( $dictionaries as $dictionary ) {
 			$translations = $dictionary['data'];
 			$newDictionaryArray = [];
-			foreach ( $translations as $translation )
-				$newDictionaryArray[ $translation['key'] ] = $translation['value'];
+			if (is_array($translations))
+				foreach ( $translations as $translation )
+					$newDictionaryArray[ $translation['key'] ] = $translation['value'];
 			$newArray[ $dictionary['id'] ] = $newDictionaryArray;
 		}
 		$data[ $key ] = $newArray;
