@@ -34,7 +34,7 @@ function bowl_create_dictionaries_fields_group ( string $title = "Dictionaries" 
 
 function bowl_create_dictionaries_filter ( string $key ) {
 	return function ( $data ) use ( $key ) {
-		if ( !isset($data[ $key ]) )
+		if ( !isset($data[$key]) || !is_array($data[$key]) )
 			return $data;
 		//			throw new Exception("bowl_create_dictionaries_filter // Cannot find $key in data.");
 		$dictionaries = $data[ $key ];
@@ -71,7 +71,7 @@ function bowl_create_keys_fields_group ( string $title = "API and product keys" 
 
 function bowl_create_keys_filter ( string $key ) {
 	return function ( $data ) use ( $key ) {
-		if ( !isset($data[ $key ]) )
+		if ( !isset($data[$key]) || !is_array($data[$key]) )
 			return $data;
 		//			throw new Exception("bowl_create_keys_filter // Cannot find $key in data.");
 		$keys = $data[$key];
@@ -143,7 +143,7 @@ function bowl_create_menu_fields_group ( string $id, string $title = "menu") {
 
 function bowl_create_menu_filter ( string $key ) {
 	return function ( $data ) use ( $key ) {
-		if ( !isset($data[ $key ]) )
+		if ( !isset($data[$key]) || !is_array($data[$key]) )
 			return $data;
 		//			throw new Exception("bowl_create_menu_filter // Cannot find $key in data.");
 		$menu = $data[$key];
