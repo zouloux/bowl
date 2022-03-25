@@ -139,7 +139,7 @@ class BowlRequest
 			'id' => $term->term_id,
 			'name' => $term->name,
 			'slug' => $term->slug,
-			'href' => get_category_link( $term ),
+			'href' => bowl_remove_base_from_href( get_category_link( $term ) ),
 		];
 	}
 
@@ -148,7 +148,7 @@ class BowlRequest
 	 * @param bool $forceRefresh Will force cache to be cleared.
 	 * @return array
 	 */
-	static function getCachedCategories ( bool $forceRefresh = false ) {
+	static function getCategories ( bool $forceRefresh = false ) {
 		if ( $forceRefresh )
 			self::$__cachedCategories = [];
 		if ( empty(self::$__cachedCategories) ) {
@@ -157,6 +157,19 @@ class BowlRequest
 				self::$__cachedCategories[] = self::filterCategory( $term );
 		}
 		return self::$__cachedCategories;
+	}
+
+	/**
+	 * Get a category by its ID.
+	 * Can be in a loop, categories are cached.
+	 */
+	static function getCategoryById ( int $id ) {
+		$categories = self::getCategories();
+		foreach ( $categories as $category ) {
+			if ( $category['id'] == $id )
+				return $category;
+		}
+		return null;
 	}
 
 	// ------------------------------------------------------------------------- AUTHOR
