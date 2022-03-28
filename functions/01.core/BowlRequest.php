@@ -134,12 +134,13 @@ class BowlRequest
 	// Cache categories request because WP seems to not cache them
 	protected static array $__cachedCategories = [];
 
-	protected static function filterCategory ( WP_Term $term ) {
+	protected static function filterCategory ( WP_Term $term, array $categories ) {
 		return [
 			'id' => $term->term_id,
 			'name' => $term->name,
 			'slug' => $term->slug,
 			'href' => bowl_remove_base_from_href( get_category_link( $term ) ),
+			'children' => [],
 		];
 	}
 
@@ -154,7 +155,12 @@ class BowlRequest
 		if ( empty(self::$__cachedCategories) ) {
 			$categories = get_categories();
 			foreach ( $categories as $term )
-				self::$__cachedCategories[] = self::filterCategory( $term );
+				self::$__cachedCategories[] = self::filterCategory( $term, $categories );
+			foreach ( self::$__cachedCategories as &$category ) {
+				$children = get_term_children($category['id'], 'category');
+				foreach ( $children as $childID )
+					$category['children'][] = self::getCategoryById( $childID );
+			}
 		}
 		return self::$__cachedCategories;
 	}
