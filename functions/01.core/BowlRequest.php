@@ -94,6 +94,16 @@ class BowlRequest
 		// TODO : Get all posts ?
 	}
 
+	// ------------------------------------------------------------------------- POSTS
+
+	static function getPosts ( array $options, bool $fetchFields = false, array|bool $autoFetchPostsWithTemplate = [] ) {
+		$posts = get_posts( $options );
+		$output = [];
+		foreach ( $posts as $post )
+			$output[] = BowlFilters::filterPost( $post, $fetchFields, $autoFetchPostsWithTemplate );
+		return $output;
+	}
+
 	// ------------------------------------------------------------------------- ATTACHMENTS
 
 	static function getAttachmentByPath ( string $path ):?BowlAttachment {
@@ -134,16 +144,6 @@ class BowlRequest
 	// Cache categories request because WP seems to not cache them
 	protected static array $__cachedCategories = [];
 
-	protected static function filterCategory ( WP_Term $term, array $categories ) {
-		return [
-			'id' => $term->term_id,
-			'name' => $term->name,
-			'slug' => $term->slug,
-			'href' => bowl_remove_base_from_href( get_category_link( $term ) ),
-			'children' => [],
-		];
-	}
-
 	/**
 	 * Get all categories and cache them.
 	 * @param bool $forceRefresh Will force cache to be cleared.
@@ -154,12 +154,14 @@ class BowlRequest
 			self::$__cachedCategories = [];
 		if ( empty(self::$__cachedCategories) ) {
 			$categories = get_categories();
+			// First, filter all categories and store them into the cache
 			foreach ( $categories as $term )
-				self::$__cachedCategories[] = self::filterCategory( $term, $categories );
-			foreach ( self::$__cachedCategories as &$category ) {
-				$children = get_term_children($category['id'], 'category');
+				self::$__cachedCategories[] = new BowlCategory( $term );
+			// Now we have all categories filtered and cached, we can query them
+			foreach ( self::$__cachedCategories as $category ) {
+				$children = get_term_children($category->id, 'category');
 				foreach ( $children as $childID )
-					$category['children'][] = self::getCategoryById( $childID );
+					$category->children[] = self::getCategoryById( $childID );
 			}
 		}
 		return self::$__cachedCategories;
@@ -172,7 +174,19 @@ class BowlRequest
 	static function getCategoryById ( int $id ) {
 		$categories = self::getCategories();
 		foreach ( $categories as $category ) {
-			if ( $category['id'] == $id )
+			if ( $category->id == $id )
+				return $category;
+		}
+		return null;
+	}
+
+	/**
+	 * Get a category by its slug
+	 */
+	static function getCategoryBySlug ( string $slug ) {
+		$categories = self::getCategories();
+		foreach ( $categories as $category ) {
+			if ( $category->slug == $slug )
 				return $category;
 		}
 		return null;

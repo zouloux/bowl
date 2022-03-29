@@ -6,7 +6,6 @@ use WordPlate\Acf\Fields\Layout;
 use WordPlate\Acf\ConditionalLogic;
 use WordPlate\Acf\Fields\ButtonGroup;
 use WordPlate\Acf\Fields\PageLink;
-use WordPlate\Acf\Fields\Repeater;
 use WordPlate\Acf\Fields\Text;
 use WordPlate\Acf\Fields\WysiwygEditor;
 
@@ -55,7 +54,9 @@ function bowl_create_conditional_group ( $label, $key, $choiceFields ) {
 		$choices[$choice] = $choice;
 	// Generate button group
 	$output = [
-		ButtonGroup::make( $label, $enabledKey )->choices( $choices ),
+		ButtonGroup::make( $label, $enabledKey )
+			->wrapper(['class' => 'noLabel'])
+			->choices( $choices )
 	];
 	// Browse choices
 	foreach ( $choiceFields as $choice => $fields ) {

@@ -82,6 +82,13 @@ html body {
   border: 0;
 }
 
+/* No label on field */
+.acf-field.noLabel:before,
+.acf-field.noLabel > .acf-label {
+  display: none !important;
+}
+
+
 /* Clean row repeater with column on first line */
 .acf-fields.-left > .acf-field.columns-group.clean {
   padding: 0 !important;
