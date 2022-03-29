@@ -25,6 +25,7 @@ class BowlNanoController
 			define('SAVEQUERIES', true);
 			NanoDebug::addCustomTab("WP Queries", function () {
 				global $wpdb;
+				if (!$wpdb->queries) return "";
 				$total = count($wpdb->queries);
 				$buffer = "<h2>Total queries: $total</h2>";
 				foreach ( $wpdb->queries as $query ) {

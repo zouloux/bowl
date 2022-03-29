@@ -72,9 +72,8 @@ class BowlFields {
 		 * SINGLETON
 		 */
 		if ( $fields->type == "singleton" ) {
-			// Set location
+			// Set location, id and order
 			$location[] = Location::if( 'options_page', $fields->name );
-			// Compute singleton ID
 			$fields->_id = 'toplevel_page_'.$fields->name;
 			// Register options page with ACF
 			acf_add_options_page(array_merge([
@@ -145,6 +144,7 @@ class BowlFields {
 		 */
 		else if ( $fields->type == "page" ) {
 			$orderHookName = 'page';
+			$fields->_id = $fields->name;
 			// This page is associated with IDs
 			if ( !empty($fields->_pageIDs) ) {
 				// Restrict deletion
@@ -158,23 +158,39 @@ class BowlFields {
 				foreach ( $fields->_pageIDs as $pageID )
 					$location[] = Location::if( 'page', $pageID );
 			}
-			// This page is associated to a template
-			if ( !empty($fields->_template) ) {
-				// Register new template
-				add_filter( 'theme_page_templates', function ($templates) use ($fields) {
-					$templates[ $fields->name ] = $fields->_template;
-					return $templates;
-				});
-				// Register location
-				$location[] = Location::if('post_template', $fields->name);
-			}
 			// Remove Wysiwyg editor from options
 			!$fields->_editor && bowl_remove_editor_for_post( $fields->name );
 		}
-		$fields->location = $location;
+		/**
+		 * CUSTOM TEMPLATE
+		 */
+		if (
+			!empty($fields->_template)
+			&& (
+				$fields->type == "collection"
+				|| $fields->type == "page"
+			)
+		) {
+			// We need to scope those field into template to avoid collisions of field names
+			// between same post type with different templates (if both have flexible for ex)
+			$fields->_id = $fields->_id."--".acf_slugify($fields->_template);
+//			dump("");
+//			dump($fields->_id);
+			// Register new template for this post type
+			$type = $fields->type == "page" ? "page" : $fields->name;
+			add_filter( 'theme_'.$type.'_templates', function ($templates) use ($fields) {
+				$templates[ $fields->_id ] = $fields->_template;
+				return $templates;
+			});
+			// Register location
+//			$location[0]->and('post_template', $fields->_id);
+			$location[0] = Location::if('post_template', $fields->_id);
+		}
 		/**
 		 * REGISTER GROUPS
 		 */
+		// Set location
+		$fields->location = $location;
 		// Patch admin custom screen
 		bowl_patch_admin_custom_screen( $fields );
 		// Ordered IDs of field groups
@@ -185,7 +201,7 @@ class BowlFields {
 			// Set a key from screen and group name to avoid collisions across screens
 			// Separator with ___ here is important because it will be used to strip
 			// back to just "$key" @see BowlFilters::patchScreenNameFields
-			$key = acf_slugify($fields->name).'___'.$key;
+			$key = acf_slugify($fields->_id ?? $fields->name).'___'.$key;
 			$rawFields = isset( $group['rawFields'] ) && $group['rawFields'];
 			// Create FieldGroup
 			$fieldGroupObject = new FieldGroup(array_merge([
@@ -193,7 +209,7 @@ class BowlFields {
 				'key' => $key,
 				// Set layout to non-null will show collapsible blocks
 				'layout' => (isset($group['noBorders']) && $group['noBorders'] ? null : ''),
-				'location' => $location,
+				'location' => $fields->location,
 				'fields' => (
 					// If rawFields is enabled, directly show fields without parent group
 					$rawFields ? $group['fields']
@@ -435,6 +451,13 @@ class BowlFields {
 	 */
 	static function createDefaultPostFields () {
 		return new BowlFields("collection", "post");
+	}
+
+
+	static function createTemplatePostFields ( string $templateName ) {
+		$fields = new BowlFields("collection", "post");
+		$fields->_template = $templateName;
+		return $fields;
 	}
 
 	// ------------------------------------------------------------------------- INIT

@@ -84,16 +84,17 @@ if ( defined('BOWL_DISABLE_META_BOX_DRAGGABLE') && BOWL_DISABLE_META_BOX_DRAGGAB
 		// Check if we are on an edit / create page in admin
 		global $pagenow;
 		if ( !in_array($pagenow, ['post-new.php', 'post.php', 'admin.php']) ) return;
-		// Remove original drag and drop script
-		// NOTE : Do not use this, it will prevent usage of all "edit" buttons on admin !
-		//wp_deregister_script('postbox');
-//		$script = "window._customMetaboxBehavior = true;";
-		// Disable drag cursor on postboxes
+		// Remove original drag and drop and open / close for all meta boxes
 		$style = ".postbox .handle-order-higher, .postbox .handle-order-lower { display: none }\n";
 		$style .= ".postbox .postbox-header .handlediv { display: none; }\n";
+		$style .= ".postbox .postbox-header .hndle { pointer-events: none; }\n";
+		// IMPORTANT NOTE : Do not use this, it will prevent usage of all "edit" buttons on admin !
+		// wp_deregister_script('postbox');
+		// $script = "window._customMetaboxBehavior = true;";
+		// IMPORTANT NOTE : Do not remove this class, ACF will crashes when changing template in admin
 		// Remove hndle class will disable draggable on meta boxes
-		$script = "jQuery(document).ready(function (\$) {\$('.postbox .postbox-header .hndle').removeClass('hndle');});";
-		bowl_inject_custom_admin_resource_for_screen(null, $style, $script);
+		//$script = "jQuery(document).ready(function (\$) {\$('.postbox .postbox-header .hndle').removeClass('hndle');});";
+		bowl_inject_custom_admin_resource_for_screen(null, $style, "");
 	});
 }
 
