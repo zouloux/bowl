@@ -96,7 +96,14 @@ class BowlRequest
 
 	// ------------------------------------------------------------------------- POSTS
 
-	static function getPosts ( array $options, bool $fetchFields = false, array|bool $autoFetchPostsWithTemplate = [] ) {
+	/**
+	 * Get bowl posts with get_posts options.
+	 * @param array $options @see https://developer.wordpress.org/reference/functions/get_posts/
+	 * @param bool $fetchFields
+	 * @param array|bool $autoFetchPostsWithTemplate
+	 * @return array
+	 */
+	static function getBowlPosts ( array $options, bool $fetchFields = false, array|bool $autoFetchPostsWithTemplate = [] ) {
 		$posts = get_posts( $options );
 		$output = [];
 		foreach ( $posts as $post )
@@ -160,8 +167,11 @@ class BowlRequest
 			// Now we have all categories filtered and cached, we can query them
 			foreach ( self::$__cachedCategories as $category ) {
 				$children = get_term_children($category->id, 'category');
-				foreach ( $children as $childID )
-					$category->children[] = self::getCategoryById( $childID );
+				foreach ( $children as $childID ) {
+					$cat = self::getCategoryById( $childID );
+					if (is_null($cat)) continue;
+					$category->children[] = $cat;
+				}
 			}
 		}
 		return self::$__cachedCategories;

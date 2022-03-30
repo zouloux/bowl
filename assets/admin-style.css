@@ -87,7 +87,9 @@ html body {
 .acf-field.noLabel > .acf-label {
   display: none !important;
 }
-
+.acf-field.noLabel > .acf-input {
+  width: 100% !important;
+}
 
 /* Clean row repeater with column on first line */
 .acf-fields.-left > .acf-field.columns-group.clean {
