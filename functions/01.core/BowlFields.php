@@ -340,7 +340,12 @@ class BowlFields {
 				}
 				// Regular post filtering
 				else if ( $post->post_type == "post" ) {
-					// TODO
+					// TODO : All posts matching
+					if ( $location['param'] == 'post_template' ) {
+						$templateName = get_page_template_slug( $post->ID );
+						if ( !empty($templateName) && $location['value'] == $templateName )
+							$isMatching = true;
+					}
 				}
 				// Custom post type filtering
 				else if ( $location['param'] == "post_type" ) {
@@ -385,6 +390,13 @@ class BowlFields {
 	}
 	static function getFieldsGroups (BowlFields $fields):array {
 		return $fields->_groups;
+	}
+
+	/**
+	 * Get nice template name (not slugified one)
+	 */
+	static function getFieldsTemplateName (BowlFields $fields):string {
+		return $fields->_template;
 	}
 
 	// ------------------------------------------------------------------------- FACTORY

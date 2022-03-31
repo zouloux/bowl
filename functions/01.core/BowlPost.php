@@ -12,17 +12,19 @@ class BowlPost
 	 * But for pages it will be named from the custom field name.
 	 */
 	static function getTemplateNameFromWPPost ( WP_Post $post ):string {
-		$templateName = $post->post_type;
+		$template = $post->post_type;
 		// If post type is page, we need to check template name from installed filters
-		if ( $post->post_type === "page" ) {
+		if ( $post->post_type === "page" || $post->post_type === "post" ) {
 			$matchingFields = BowlFields::getMatchingInstalledFieldsForPost( $post );
 			/** @var BowlFields $field */
 			foreach ( $matchingFields as $field ) {
-				$templateName = $field->name;
-				break;
+				$templateID = get_page_template_slug( $post->ID );
+				$exploded = explode("--", $templateID, 2);
+				$template = ( count($exploded) == 2 ? $exploded[1] : $templateID );
 			}
+			$template = $post->post_type.'-'.$template;
 		}
-		return $templateName;
+		return $template;
 	}
 
 	// -------------------------------------------------------------------------
