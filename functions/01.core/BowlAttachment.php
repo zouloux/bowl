@@ -39,15 +39,13 @@ class BowlAttachment
 	}
 }
 
-class BowlGraphicAttachment extends BowlAttachment
+trait BowlGraphicTrait
 {
 	public int $width;
 	public int $height;
 	public float $ratio;
 
-	public function __construct ( array $source ) {
-		// Relay to BowlAttachment
-		parent::__construct($source);
+	protected function initGraphicTrait ( array $source ) {
 		// Width / height / ratio
 		$this->width = $source["width"];
 		$this->height = $source["height"];
@@ -55,7 +53,26 @@ class BowlGraphicAttachment extends BowlAttachment
 	}
 }
 
-class BowlImage extends BowlGraphicAttachment
+class BowlImageFormat
+{
+	use BowlGraphicTrait;
+
+	public string $href;
+	public string $name;
+
+	/**
+	 * @var string "jpg" / "png" / "gif" / "webp"
+	 */
+	public string $format;
+
+	public function __construct ( array $source ) {
+		foreach ( $source as $key => $value )
+			$this->$key = $value;
+		$this->initGraphicTrait( $source );
+	}
+}
+
+class BowlImage extends BowlAttachment
 {
 	protected static function mimeTypeToFormat ( string $mimeType ) {
 		$mimeToFormat = [
@@ -73,13 +90,12 @@ class BowlImage extends BowlGraphicAttachment
 
 	public array $blurhash = [];
 
+	use BowlGraphicTrait;
+
 	public function __construct ( array $source ) {
-		// Relay to BowlGraphicAttachment
+		// Relay to BowlAttachment and init BowlGraphicTrait
 		parent::__construct($source);
-		// Width / height / ratio
-		$this->width = $source["width"];
-		$this->height = $source["height"];
-		$this->ratio = ($this->width /  $this->height) ?? 1;
+		$this->initGraphicTrait( $source );
 		// Get blur hash
 		$blurHash = get_post_meta($this->id, "blur_hash", true);
 		if ( is_string($blurHash) ) {
@@ -125,22 +141,13 @@ class BowlImage extends BowlGraphicAttachment
 	}
 }
 
-class BowlImageFormat
-{
-	public int $width;
-	public int $height;
-	public string $href;
-	public string $name;
-	/**
-	 * @var string "jpg" / "png" / "gif" / "webp"
-	 */
-	public string $format;
+
+class BowlVideo extends BowlAttachment {
+	use BowlGraphicTrait;
 
 	public function __construct ( array $source ) {
-		foreach ( $source as $key => $value )
-			$this->$key = $value;
+		// Relay to BowlAttachment and init BowlGraphicTrait
+		parent::__construct($source);
+		$this->initGraphicTrait( $source );
 	}
 }
-
-
-class BowlVideo extends BowlGraphicAttachment {}
