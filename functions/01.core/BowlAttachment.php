@@ -71,7 +71,7 @@ class BowlImage extends BowlGraphicAttachment
 	/** @var BowlImageFormat[] $formats */
 	public array $formats = [];
 
-	public array $blurHash = [];
+	public array $blurhash = [];
 
 	public function __construct ( array $source ) {
 		// Relay to BowlGraphicAttachment
@@ -88,7 +88,7 @@ class BowlImage extends BowlGraphicAttachment
 			}
 			catch ( Exception $e ) {}
 			if ( is_array($blurHash) )
-				$this->blurHash = $blurHash;
+				$this->blurhash = $blurHash;
 		}
 		// Native formats (same as original mime types but resized)
 		foreach ( $source['sizes'] as $key => $size ) {
