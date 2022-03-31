@@ -63,7 +63,7 @@ class BowlFilters
 			// Filter media
 			else if (
 				is_array($node) && isset($node['type'])
-				&& isset($node['subtype']) && is_array($node['sizes'])
+				&& isset($node['subtype']) && isset($node['sizes']) && is_array($node['sizes'])
 			) {
 				$data[$key] = self::filterAttachment( $node );
 			}
