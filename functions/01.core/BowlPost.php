@@ -15,14 +15,25 @@ class BowlPost
 		$template = $post->post_type;
 		// If post type is page, we need to check template name from installed filters
 		if ( $post->post_type === "page" || $post->post_type === "post" ) {
+			// Browse matching fields to get the best template name
 			$matchingFields = BowlFields::getMatchingInstalledFieldsForPost( $post );
 			/** @var BowlFields $field */
 			foreach ( $matchingFields as $field ) {
-				$templateID = get_page_template_slug( $post->ID );
-				$exploded = explode("--", $templateID, 2);
-				$template = ( count($exploded) == 2 ? $exploded[1] : $templateID );
+				// Check this field is a post template
+				$fieldTemplateName = BowlFields::getFieldsTemplateName($field);
+				if ( !empty($fieldTemplateName) ) {
+					$templateID = get_page_template_slug( $post->ID );
+					$exploded = explode("--", $templateID, 2);
+					$template = ( count($exploded) == 2 ? $exploded[1] : $templateID );
+					$template = $post->post_type.'-'.$template;
+					break;
+				}
+				// Otherwise, get field name as template name
+				else if ( !empty($field->name) ) {
+					$template = $field->name;
+					break;
+				}
 			}
-			$template = $post->post_type.'-'.$template;
 		}
 		return $template;
 	}

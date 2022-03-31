@@ -480,7 +480,7 @@ class BowlFields {
 
 	protected array $_pageIDs = [];
 
-	protected string $_template;
+	protected string $_template = "";
 
 	public array $location = [];
 
