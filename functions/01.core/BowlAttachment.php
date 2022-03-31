@@ -39,7 +39,23 @@ class BowlAttachment
 	}
 }
 
-class BowlImage extends BowlAttachment
+class BowlGraphicAttachment extends BowlAttachment
+{
+	public int $width;
+	public int $height;
+	public float $ratio;
+
+	public function __construct ( array $source ) {
+		// Relay to BowlAttachment
+		parent::__construct($source);
+		// Width / height / ratio
+		$this->width = $source["width"];
+		$this->height = $source["height"];
+		$this->ratio = ($this->width /  $this->height) ?? 1;
+	}
+}
+
+class BowlImage extends BowlGraphicAttachment
 {
 	protected static function mimeTypeToFormat ( string $mimeType ) {
 		$mimeToFormat = [
@@ -52,22 +68,18 @@ class BowlImage extends BowlAttachment
 		return $mimeToFormat[ $mimeType ] ?? "unknown";
 	}
 
-	public int $width;
-	public int $height;
-	public int $ratio;
-
 	/** @var BowlImageFormat[] $formats */
 	public array $formats = [];
 
 	public array $blurHash = [];
 
 	public function __construct ( array $source ) {
-		// Relay to BowlAttachment
+		// Relay to BowlGraphicAttachment
 		parent::__construct($source);
 		// Width / height / ratio
 		$this->width = $source["width"];
 		$this->height = $source["height"];
-		$this->ratio = ($this->width / $this->height) ?? 1;
+		$this->ratio = ($this->width /  $this->height) ?? 1;
 		// Get blur hash
 		$blurHash = get_post_meta($this->id, "blur_hash", true);
 		if ( is_string($blurHash) ) {
@@ -129,3 +141,6 @@ class BowlImageFormat
 			$this->$key = $value;
 	}
 }
+
+
+class BowlVideo extends BowlGraphicAttachment {}

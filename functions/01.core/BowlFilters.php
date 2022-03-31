@@ -62,8 +62,10 @@ class BowlFilters
 			}
 			// Filter media
 			else if (
-				is_array($node) && isset($node['type'])
-				&& isset($node['subtype']) && isset($node['sizes']) && is_array($node['sizes'])
+				is_array($node)
+				&& isset($node['type'])
+				&& isset($node['subtype'])
+				&& isset($node['mime_type'])
 			) {
 				$data[$key] = self::filterAttachment( $node );
 			}
@@ -159,7 +161,7 @@ class BowlFilters
 	 */
 	static function filterRichContent ( string $content ):string {
 		// Remove HTML comments
-		$content = preg_replace('/<!--(.*)-->/Uis', '', $content);
+		$content = preg_replace("/<!--(.*)-->/Uis", "", $content);
 		// Remove multiple line jumps
 		return preg_replace("/[\r\n]+/", "\n", $content);
 	}
@@ -170,9 +172,10 @@ class BowlFilters
 	 * @return BowlAttachment
 	 */
 	static function filterAttachment ( array $node ):BowlAttachment {
-		if ( $node['type'] === 'image' )
+		if ( $node["type"] === "image" )
 			return new BowlImage( $node );
-		// TODO : Filter other file types
+		else if ( $node["type"] === "video")
+			return new BowlVideo( $node );
 		else
 			return new BowlAttachment( $node );
 	}
