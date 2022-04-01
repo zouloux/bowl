@@ -107,18 +107,18 @@ if ( defined('BOWL_ADD_IMAGE_META_BOX') && BOWL_ADD_IMAGE_META_BOX ) {
 	});
 }
 
-// Remove excerpt meta box
-if ( defined('BOWL_DISABLE_EXCERPT') && BOWL_DISABLE_EXCERPT ) {
-	add_action( 'admin_init', function () {
-		remove_post_type_support( 'post', 'excerpt' );
-	});
-}
-
 // Clean meta box on sidebar
 add_action('add_meta_boxes', function () {
 	global $wp_meta_boxes;
 	//dump($wp_meta_boxes);exit;
 	foreach ( $wp_meta_boxes as $key => $value ) {
+		// Move excerpt on size
+		if ( defined('BOWL_EXCERPT_META_BOX_ON_SIDE') && BOWL_EXCERPT_META_BOX_ON_SIDE ) {
+			if ( isset($wp_meta_boxes[ $key ]['normal']['core']['postexcerpt']) ) {
+				$wp_meta_boxes[ $key ]['side']['core']['postexcerpt'] = $wp_meta_boxes[ $key ]['normal']['core']['postexcerpt'];
+				unset($wp_meta_boxes[ $key ]['normal']['core']['postexcerpt']);
+			}
+		}
 		// Move author meta box on side
 		if ( defined('BOWL_AUTHOR_META_BOX_ON_SIDE') && BOWL_AUTHOR_META_BOX_ON_SIDE ) {
 			if ( isset($wp_meta_boxes[ $key ]['normal']['core']['authordiv']) ) {

@@ -56,18 +56,14 @@ JS;
 		bowl_inject_custom_admin_resource_for_screen( null, "${titleClass} { opacity: 1; } ");
 }
 
-// ----------------------------------------------------------------------------- EDITOR
+// ----------------------------------------------------------------------------- EDITOR & EXCERPT
 
-function bowl_remove_editor_for_post ( $postID, $postType = null ) {
-	add_filter( 'admin_head', function () use ($postID, $postType) {
+function bowl_remove_field_for_post ( $postType, $field = 'editor', $postID = null ) {
+	add_filter( 'admin_head', function () use ($postType, $postID, $field) {
 		global $post;
-		if (
-			!is_null($post) && (
-				( !is_null($postID) && $post->ID == $postID )
-				|| ( !is_null($postType) && $post->post_type == $postType )
-			)
-		) {
-			remove_post_type_support( 'page', 'editor' );
-		}
+		if ( is_null($post) ) return;
+		if ( !is_null($postID) && $post->ID != $postID ) return;
+		if ( $postType != $post->post_type ) return;
+		remove_post_type_support( $postType, $field );
 	});
 }

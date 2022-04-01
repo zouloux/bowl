@@ -135,8 +135,15 @@ class BowlFields {
 					$location[0]->and( 'page', '!=', $pageID );
 				// FIXME : Faire en sorte que le bowl_remove_editor_for_post prenne en compte le "not"
 				// FIXME : Car là ça vire pour toutes les pages
-				// Remove Wysiwyg editor from options
-				!$fields->_editor && bowl_remove_editor_for_post( null, 'page' );
+				// Remove Wysiwyg editor
+				!$fields->_editor && bowl_remove_field_for_post( 'page', 'editor' );
+				!$fields->_excerpt && bowl_remove_field_for_post( 'page', 'excerpt');
+			}
+			// All posts
+			else {
+				// Remove Wysiwyg editor
+				!$fields->_editor && bowl_remove_field_for_post( 'post', 'editor' );
+				!$fields->_excerpt && bowl_remove_field_for_post( 'post', 'excerpt');
 			}
 		}
 		/**
@@ -154,12 +161,14 @@ class BowlFields {
 				};
 				add_action('wp_trash_post', $restrict_post_deletion, 10, 1);
 				add_action('delete_post', $restrict_post_deletion, 10, 1);
-				// Register location
-				foreach ( $fields->_pageIDs as $pageID )
+				foreach ( $fields->_pageIDs as $pageID ) {
+					// Register location
 					$location[] = Location::if( 'page', $pageID );
+					// Remove Wysiwyg editor
+					!$fields->_editor && bowl_remove_field_for_post( 'page', 'editor', $pageID );
+					!$fields->_excerpt && bowl_remove_field_for_post( 'page', 'excerpt', $pageID );
+				}
 			}
-			// Remove Wysiwyg editor from options
-			!$fields->_editor && bowl_remove_editor_for_post( $fields->name );
 		}
 		/**
 		 * CUSTOM TEMPLATE
@@ -550,6 +559,14 @@ class BowlFields {
 	protected bool $_editor = true;
 	public function editor ( bool $editor ) {
 		$this->_editor = $editor;
+		return $this;
+	}
+
+	// ------------------------------------------------------------------------- EXCERPT
+
+	protected bool $_excerpt = true;
+	public function excerpt ( bool $excerpt ) {
+		$this->_excerpt = $excerpt;
 		return $this;
 	}
 
