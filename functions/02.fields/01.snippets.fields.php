@@ -47,11 +47,12 @@ function bowl_create_enabled_conditional_fields ( $label = "Enabled", $default =
 
 function bowl_create_conditional_group ( $label, $key, $choiceFields ) {
 	// Key for button group
-	$enabledKey = $key.'_buttons';
-	// Convert choices to "choice" => "choice"
+	$enabledKey = 'selectorGroup_selected';
+	// Convert choices to "my-choice" => "My Choice"
 	$choices = [];
-	foreach ( $choiceFields as $choice => $fields )
-		$choices[$choice] = $choice;
+	foreach ( $choiceFields as $choice => $fields ) {
+		$choices[ acf_slugify($choice) ] = $choice;
+	}
 	// Generate button group
 	$output = [
 		ButtonGroup::make( $label, $enabledKey )
@@ -60,15 +61,16 @@ function bowl_create_conditional_group ( $label, $key, $choiceFields ) {
 	];
 	// Browse choices
 	foreach ( $choiceFields as $choice => $fields ) {
+		$slugified = acf_slugify($choice);
 		// Do not create empty groups
 		if (empty($fields)) continue;
 		// Create group and connect it to correct choice
-		$output[] = Group::make(' ', $key.'_'.$choice)
+		$output[] = Group::make(' ', 'selectorGroup_'.$slugified)
 			->layout("row")
 			->wrapper(['class' => 'conditionalGroup'])
 			->fields( $fields )
 			->conditionalLogic([
-				ConditionalLogic::if( $enabledKey )->equals( $choice )
+				ConditionalLogic::if( $enabledKey )->equals( $slugified )
 			]);
 	}
 	return $output;

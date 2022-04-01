@@ -48,10 +48,31 @@ class BowlFilters
 		// Browse node properties
 		foreach ( $data as $key => &$node ) {
 			// Remove all data for a node when field enabled=false
-			if ( is_array($node) && isset($node['enabled']) && $node['enabled'] == false )
+			if ( is_array($node) && isset($node['enabled']) && $node['enabled'] == false ) {
 				$data[ $key ] = [ 'enabled' => false ];
+				continue;
+			}
+			// Convert flexible layouts to "type"
+			if ( $key === 'acf_fc_layout' ) {
+				$data += ['type' => $data[$key]];
+				unset( $data[$key] );
+			}
+			// Filter conditional groups
+			if (
+				is_array($node)
+				&& isset($node['selectorGroup_selected'])
+			) {
+				$node['selected'] = $node['selectorGroup_selected'];
+				unset($node['selectorGroup_selected']);
+				if ( isset($node['selectorGroup_'.$node['selected']]) )
+					$node += $node['selectorGroup_'.$node['selected']];
+				foreach ( $node as $k => $v ) {
+					if ( str_starts_with($k, 'selectorGroup_') )
+						unset($node[$k]);
+				}
+			}
 			// Filter WP_Post to BowlPost and auto fetch fields and sub posts
-			else if ( $node instanceof WP_Post ) {
+			if ( $node instanceof WP_Post ) {
 				// If we need to fetch fields for this post
 				$fetchFields = (
 					is_bool($autoFetchPostsWithTemplate) ? $autoFetchPostsWithTemplate
@@ -59,23 +80,20 @@ class BowlFilters
 				);
 				// Recursively convert to BowlPost
 				$data[ $key ] = BowlFilters::filterPost( $node, $fetchFields, $autoFetchPostsWithTemplate );
+				continue;
 			}
 			// Filter media
-			else if (
+			if (
 				is_array($node)
 				&& isset($node['type'])
 				&& isset($node['subtype'])
 				&& isset($node['mime_type'])
 			) {
 				$data[$key] = self::filterAttachment( $node );
-			}
-			// Convert flexible layouts to "type"
-			else if ( $key === 'acf_fc_layout' ) {
-				$data += ['type' => $data[$key]];
-				unset( $data[$key] );
+				continue;
 			}
 			// Recursive patch filter
-			else if ( is_array($node) )
+			if ( is_array($node) )
 				$data[ $key ] = BowlFilters::recursivePatchFields( $node, $autoFetchPostsWithTemplate );
 		}
 		return $data;
