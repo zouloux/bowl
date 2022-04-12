@@ -145,7 +145,7 @@ class BowlFilters
 			if ( $filter[0] )
 				$fields = $filter[1]( $fields, $post );
 		// Create a new bowl post from original WP_Post and parsed fields
-		return new BowlPost( $post, $fields );
+		return new BowlPost( $post, $fields, true, true );
 	}
 
 	// ------------------------------------------------------------------------- FILTER SINGLETON
