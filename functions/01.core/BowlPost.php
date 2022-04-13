@@ -47,6 +47,7 @@ class BowlPost
 	public string $type;
 	public string $content;
 	public string $excerpt;
+	public BowlImage|null $thumbnail = null;
 	public bool $isPublished;
 	public string $template;
 	public int $parentPostID;
@@ -70,6 +71,24 @@ class BowlPost
 		// Clean content and excerpt
 		$this->content = BowlFilters::filterRichContent($post->post_content);
 		$this->excerpt = BowlFilters::filterRichContent($post->post_excerpt);
+		// Get thumbnail
+		$thumbnailID = get_post_thumbnail_id( $this->id );
+		if ( $thumbnailID != 0 ) {
+			$src = wp_get_attachment_image_src( $thumbnailID, 0 );
+			$image = wp_get_attachment_metadata( $thumbnailID );
+			if ( is_array($src) && is_array($image) && !empty($image["file"]) ) {
+				$this->thumbnail = new BowlImage([
+					"ID" => $thumbnailID,
+					"type" => "jpeg", // FIXME
+					"filename" => $image["file"],
+					"filesize" => 0, // FIXME
+					"url" => $src[0],
+					"width" => $image["width"],
+					"height" => $image["height"],
+					"sizes" => $image["sizes"],
+				]);
+			}
+		}
 		// Get template name
 		$this->template = self::getTemplateNameFromWPPost( $post );
 		// Fetch categories

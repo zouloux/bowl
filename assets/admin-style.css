@@ -385,3 +385,9 @@ body.wp-admin #wpcontent {
 .wp-list-table .column-rank_math_seo_details {
   display: none;
 }
+
+/* Patch ACF date picker style */
+.ui-datepicker-calendar .ui-state-highlight {
+  width: auto !important;
+  height: auto !important;
+}

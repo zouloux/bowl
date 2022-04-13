@@ -28,7 +28,7 @@ function bowl_inject_twig_helpers ( \Twig\Environment $twig ) {
 //				}
 			}
 
-			// No format found find biggest
+			// No format found, find biggest
 			if ( empty($matchingFormats) ) {
 				$biggestFormatsByType = [];
 				foreach ( $image->formats as $format ) {
