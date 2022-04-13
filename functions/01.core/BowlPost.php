@@ -41,7 +41,6 @@ class BowlPost
 	// -------------------------------------------------------------------------
 
 	public int $id;
-	public int $timestamp;
 	public string $title;
 	public string $href;
 	public string $type;
@@ -51,6 +50,8 @@ class BowlPost
 	public bool $isPublished;
 	public string $template;
 	public int $parentPostID;
+	public DateTime $postDate;
+	public DateTime $postModifiedDate;
 	public array $categories = [];
 	public BowlAuthor|null $author = null;
 
@@ -62,12 +63,13 @@ class BowlPost
 		$this->_source = $post;
 		// Get post properties
 		$this->id = $post->ID;
-		$this->timestamp = (new \DateTime($post->post_date))->getTimestamp();
 		$this->title = $post->post_title;
 		$this->href = get_permalink( $post );
 		$this->type = $post->post_type;
 		$this->isPublished = $post->post_status == "publish";
 		$this->parentPostID = $post->post_parent;
+		$this->postDate = new \DateTime( $post->post_date );
+		$this->postModifiedDate = new \DateTime( $post->post_date );
 		// Clean content and excerpt
 		$this->content = BowlFilters::filterRichContent($post->post_content);
 		$this->excerpt = BowlFilters::filterRichContent($post->post_excerpt);
@@ -79,7 +81,7 @@ class BowlPost
 			if ( is_array($src) && is_array($image) && !empty($image["file"]) ) {
 				$this->thumbnail = new BowlImage([
 					"ID" => $thumbnailID,
-					"type" => "jpeg", // FIXME
+					"type" => "image",
 					"filename" => $image["file"],
 					"filesize" => 0, // FIXME
 					"url" => $src[0],
