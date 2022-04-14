@@ -50,8 +50,8 @@ class BowlPost
 	public bool $isPublished;
 	public string $template;
 	public int $parentPostID;
-	public DateTime $postDate;
-	public DateTime $postModifiedDate;
+	public DateTime $date;
+	public DateTime $modified;
 	public array $categories = [];
 	public BowlAuthor|null $author = null;
 
@@ -68,8 +68,8 @@ class BowlPost
 		$this->type = $post->post_type;
 		$this->isPublished = $post->post_status == "publish";
 		$this->parentPostID = $post->post_parent;
-		$this->postDate = new \DateTime( $post->post_date );
-		$this->postModifiedDate = new \DateTime( $post->post_date );
+		$this->date = new \DateTime( $post->post_date );
+		$this->modified = new \DateTime( $post->post_modified );
 		// Clean content and excerpt
 		$this->content = BowlFilters::filterRichContent($post->post_content);
 		$this->excerpt = BowlFilters::filterRichContent($post->post_excerpt);
