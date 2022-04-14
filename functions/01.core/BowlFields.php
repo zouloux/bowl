@@ -235,6 +235,7 @@ class BowlFields {
 			// Convert to array and store key to order it later
 			$fieldGroupArray = $fieldGroupObject->toArray();
 			$fieldGroupsIDOrders[] = 'acf-'.$fieldGroupArray['key'];
+//			dump($fieldGroupArray);
 			// Register this field group
 			register_field_group( $fieldGroupArray );
 		}
@@ -279,6 +280,17 @@ class BowlFields {
 			$editPages = $menu[$menuIndex];
 			unset($menu[$menuIndex]);
 			array_splice($menu, $postsIndex - 1, 0, [ $editPages ]);
+			// Move singleton / pages separator
+			$firstSeparatorIndex = 0;
+			foreach ( $menu as $index => $section ) {
+				if ( $section[1] == "edit_posts" && $section[2] == "edit.php" )
+					$postsIndex = $index;
+				if ( $section[2] == "separator1" )
+					$firstSeparatorIndex = $index;
+			}
+			$separator = $menu[$firstSeparatorIndex];
+			unset($menu[$firstSeparatorIndex]);
+			array_splice($menu, $postsIndex, 0, [ $separator ]);
 			// Add a separator after post_types area
 			ksort( $menu );
 			$uploadsIndex = 0;
