@@ -114,7 +114,7 @@ class BowlFilters
 	 * @param array|bool $autoFetchPostsWithTemplate
 	 * @return BowlPost|null
 	 */
-	static function filterPost ( WP_Post|null $post, bool $fetchFields = true, array|bool $autoFetchPostsWithTemplate = [] ):?BowlPost {
+	static function filterPost ( WP_Post|null $post, bool $fetchFields = true, array|bool $autoFetchPostsWithTemplate = []):?BowlPost {
 		if ( is_null($post) )
 			return null;
 		// Do not fetch fields
@@ -145,7 +145,7 @@ class BowlFilters
 			if ( $filter[0] )
 				$fields = $filter[1]( $fields, $post );
 		// Create a new bowl post from original WP_Post and parsed fields
-		return new BowlPost( $post, $fields );
+		return new BowlPost( $post, $fields, true, true );
 	}
 
 	// ------------------------------------------------------------------------- FILTER SINGLETON
