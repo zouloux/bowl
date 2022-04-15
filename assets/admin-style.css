@@ -272,9 +272,6 @@ html body {
   margin: 8px !important;
   border-top: 1px solid rgba(255, 255, 255, .3);
 }
-#adminmenu .wp-menu-separator:nth-child(2) {
-  display: none;
-}
 #toplevel_page_wpseo_dashboard .update-plugins {
   display: none;
 }

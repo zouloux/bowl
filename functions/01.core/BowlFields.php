@@ -72,22 +72,24 @@ class BowlFields {
 		 * SINGLETON
 		 */
 		if ( $fields->type == "singleton" ) {
-			// Set location, id and order
-			$location[] = Location::if( 'options_page', $fields->name );
-			$fields->_id = 'toplevel_page_'.$fields->name;
-			// Register options page with ACF
-			acf_add_options_page(array_merge([
-				'menu_slug' => $fields->name,
-				'page_title' => $fields->_label[0],
-				'icon_url' => $fields->_icon,
-				'position' => $fields->_position,
-			], $fields->_options));
-			// Register this options page type as multi-lang
-			if ( $isMultiLang )
-				add_filter('wpm_admin_pages', function ( $config ) use ( $fields ) {
-					$config[] = $fields->_id;
-					return $config;
-				});
+			if ( !empty($fields->_label) ) {
+				// Set location, id and order
+				$location[] = Location::if( 'options_page', $fields->name );
+				$fields->_id = 'toplevel_page_'.$fields->name;
+				// Register options page with ACF
+				acf_add_options_page(array_merge([
+					'menu_slug' => $fields->name,
+					'page_title' => $fields->_label[0],
+					'icon_url' => $fields->_icon,
+					'position' => $fields->_position,
+				], $fields->_options));
+				// Register this options page type as multi-lang
+				if ( $isMultiLang )
+					add_filter('wpm_admin_pages', function ( $config ) use ( $fields ) {
+						$config[] = $fields->_id;
+						return $config;
+					});
+			}
 		}
 		/**
 		 * COLLECTION
@@ -267,41 +269,37 @@ class BowlFields {
 	protected static function reorderMenu ( $separatorPosition ) {
 		add_action( 'admin_init', function () use ($separatorPosition) {
 			global $menu;
-			if (!$menu) return; // sometime menu is not init
-			$menuIndex = 0;
-			$postsIndex = 0;
+			// Sometime menu is not init at this time
+			if (!$menu) return;
+			// Remove dashboard item
 			foreach ( $menu as $index => $section ) {
-				if ( $section[1] == "edit_posts" && $section[2] == "edit.php" )
-					$postsIndex = $index;
-				if ( $section[1] == "edit_pages" )
-					$menuIndex = $index;
+				if ($section[2] == "index.php" && $section[5] == "menu-dashboard")
+					unset($menu[$index]);
 			}
-			// Replace menu into post_types area
-			$editPages = $menu[$menuIndex];
-			unset($menu[$menuIndex]);
-			array_splice($menu, $postsIndex - 1, 0, [ $editPages ]);
-			// Move singleton / pages separator
-			$firstSeparatorIndex = 0;
-			foreach ( $menu as $index => $section ) {
-				if ( $section[1] == "edit_posts" && $section[2] == "edit.php" )
-					$postsIndex = $index;
-				if ( $section[2] == "separator1" )
-					$firstSeparatorIndex = $index;
+			$orderedMenu = [];
+			// Get page section to move it after posts
+			$pageSection = null;
+			foreach ( $menu as $section ) {
+				if ( $section[1] != "edit_pages" ) continue;
+				$pageSection = $section;
 			}
-			$separator = $menu[$firstSeparatorIndex];
-			unset($menu[$firstSeparatorIndex]);
-			array_splice($menu, $postsIndex, 0, [ $separator ]);
-			// Add a separator after post_types area
-			ksort( $menu );
-			$uploadsIndex = 0;
-			foreach ( $menu as $index => $section ) {
-				if ( $section[1] == "upload_files" && $section[2] == "upload.php" )
-					$uploadsIndex = $index;
+			// Browse and re-order menu
+			$separatorIndex = 0;
+			foreach ( $menu as $section ) {
+				if ( $section[2] == "separator1" || $section[1] == "edit_pages" )
+					continue;
+				$isPost = $section[1] == "edit_posts" && $section[2] == "edit.php";
+				if ( $isPost || $section[1] == "upload_files" && $section[2] == "upload.php" ) {
+					$separatorIndex ++;
+					$orderedMenu[] = ['','read',"separator$separatorIndex",'','wp-menu-separator'];
+				}
+				$orderedMenu[] = $section;
+				if ( $isPost )
+					$orderedMenu[] = $pageSection;
 			}
-			array_splice($menu, $uploadsIndex + 1, 0, [
-				['','read',"separator$uploadsIndex}",'','wp-menu-separator']
-			]);
-			ksort( $menu );
+//			foreach ( $newMenu as $index => $section ) dump($section);
+			// Override ordered global menu
+			$menu = $orderedMenu;
 		});
 	}
 
@@ -514,12 +512,12 @@ class BowlFields {
 		else if ( $type == "collection" )
 			$this->_position = 6;
 		// Default name
-		$this->_label = [$name];
+//		$this->_label = [$name];
 	}
 
 	// ------------------------------------------------------------------------- MENU
 
-	protected array $_label;
+	protected array $_label = [];
 	protected string $_icon = "";
 	protected int $_position = 0;
 
