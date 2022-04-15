@@ -52,13 +52,14 @@ class BowlPost
 	public int $parentPostID;
 	public DateTime $date;
 	public DateTime $modified;
+	public array $tags = [];
 	public array $categories = [];
 	public BowlAuthor|null $author = null;
 
 	protected WP_Post $_source;
 	public function getSource ():WP_Post { return $this->_source; }
 
-	public function __construct ( WP_Post $post, public array $fields = [], $fetchCategories = false, $fetchAuthor = false ) {
+	public function __construct ( WP_Post $post, public array $fields = [], $fetchTerms = false, $fetchAuthor = false ) {
 		// Save original WP post
 		$this->_source = $post;
 		// Get post properties
@@ -93,19 +94,21 @@ class BowlPost
 		}
 		// Get template name
 		$this->template = self::getTemplateNameFromWPPost( $post );
-		// Fetch categories
-		if ( $fetchCategories )
-			$this->fetchCategories();
+		// Fetch terms
+		if ( $fetchTerms )
+			$this->fetchTerms();
 		// Fetch author
 		if ( $fetchAuthor )
 			$this->fetchAuthor();
 	}
 
-	public function fetchCategories () {
+	public function fetchTerms () {
 		$categoryIDS = wp_get_post_categories( $this->id );
 		if ( !empty($categoryIDS) )
 			foreach ( $categoryIDS as $categoryID )
 				$this->categories[] = BowlRequest::getCategoryById( $categoryID );
+		$tags = wp_get_post_terms( $this->id, 'post_tag', [ "fields" => "all" ] );
+		$this->tags = BowlRequest::filterTags( $tags );
 	}
 
 	public function fetchAuthor () {

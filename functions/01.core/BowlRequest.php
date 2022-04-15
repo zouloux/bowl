@@ -163,7 +163,7 @@ class BowlRequest
 			$categories = get_categories();
 			// First, filter all categories and store them into the cache
 			foreach ( $categories as $term )
-				self::$__cachedCategories[] = new BowlCategory( $term );
+				self::$__cachedCategories[] = new BowlTerm( $term );
 			// Now we have all categories filtered and cached, we can query them
 			foreach ( self::$__cachedCategories as $category ) {
 				$children = get_term_children($category->id, 'category');
@@ -202,7 +202,16 @@ class BowlRequest
 		return null;
 	}
 
-	// ------------------------------------------------------------------------- AUTHOR
+	// ------------------------------------------------------------------------- TAGS
 
-	// TODO : Get author object by ID, other post types ... check WP doc
+	static function filterTag ( WP_Term $tag ) {
+		return new BowlTerm( $tag );
+	}
+
+	static function filterTags ( array $tags ) {
+		$filteredTags = [];
+		foreach ( $tags as $tag )
+			$filteredTags[] = self::filterTag( $tag );
+		return $filteredTags;
+	}
 }
