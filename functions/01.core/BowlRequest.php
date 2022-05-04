@@ -160,7 +160,9 @@ class BowlRequest
 		if ( $forceRefresh )
 			self::$__cachedCategories = [];
 		if ( empty(self::$__cachedCategories) ) {
-			$categories = get_categories();
+			$categories = get_categories([
+				'hide_empty' => false
+			]);
 			// First, filter all categories and store them into the cache
 			foreach ( $categories as $term )
 				self::$__cachedCategories[] = new BowlTerm( $term );
