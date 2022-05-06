@@ -179,6 +179,16 @@ class BowlRequest
 		return self::$__cachedCategories;
 	}
 
+	static function getCategoryHierarchy () {
+		$hierarchyOutput = [];
+		$categories = self::getCategories();
+		foreach ( $categories as $category ) {
+			if ( $category->parentID == 0 )
+				$hierarchyOutput[] = $category;
+		}
+		return $hierarchyOutput;
+	}
+
 	/**
 	 * Get a category by its ID.
 	 * Can be in a loop, categories are cached.

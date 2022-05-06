@@ -7,6 +7,7 @@ class BowlTerm
 	public string $slug;
 	public string $href;
 	public array $children = [];
+	public int $parentID;
 
 	protected WP_Term $_source;
 	public function getSource ():WP_Term { return $this->_source; }
@@ -17,5 +18,6 @@ class BowlTerm
 		$this->name = $source->name;
 		$this->slug = $source->slug;
 		$this->href = bowl_remove_base_from_href( get_category_link( $source ) );
+		$this->parentID = $source->parent;
 	}
 }
