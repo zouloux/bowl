@@ -17,7 +17,8 @@ html body {
 }
 
 /* Hide useless admin elements */
-#screen-meta-links,
+/* FIXME : Screen options enabled back because admin users needs to enable excerpt meta box, etc ... */
+/*#screen-meta-links,*/
 #preview-action {
   display: none !important;
 }
