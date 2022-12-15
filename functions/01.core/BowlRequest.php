@@ -75,8 +75,10 @@ class BowlRequest
 		foreach ( $groups as $groupKey => $group ) {
 			// FIXME : This is not super clean because we can have keys colliding
 			// FIXME : Raw fields vs group fields are not stored the same way with ACF ...
-			$groupData = get_field( $singletonName.'___'.$groupKey, 'option' );
+			$groupData = get_field( 'toplevel-page-'.$singletonName.'___'.$groupKey, 'option' );
 			// Try with prefix, and without
+			if ( is_null($groupData) )
+				$groupData = get_field( $singletonName.'___'.$groupKey, 'option' );
 			if ( is_null($groupData) )
 				$groupData = get_field( $groupKey, 'option' );
 			if ( is_null($groupData) )

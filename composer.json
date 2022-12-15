@@ -3,7 +3,7 @@
 	"description": "Advanced CMS fields workflow on top of Wordplate for Wordpress.",
 	"license": "MIT",
 	"type": "wordpress-plugin",
-	"version": "1.0.34",
+	"version": "1.0.35",
 	"keywords": [
 		"wordplate",
 		"wordpress",
