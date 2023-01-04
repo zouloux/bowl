@@ -340,7 +340,7 @@ class BowlFields {
 			/** @var Location $locations */
 			foreach ( $installedField->location as $locations ) {
 				// Only check first location (check "or" but do not check "and")
-				$location = $locations->toArray()[0];
+				$location = $locations->get()[0];
 				//dump($location);
 				$isMatching = false;
 				// Page filtering
@@ -386,7 +386,7 @@ class BowlFields {
 			// Browse locations to check if this post match
 			/** @var Location $locations */
 			foreach ( $installedField->location as $locations ) {
-				$location = $locations->toArray();
+				$location = $locations->get();
 				if ( !isset($location[0]) ) continue;
 				if (
 					$location[0]['param'] == "options_page"
