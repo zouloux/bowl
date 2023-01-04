@@ -39,7 +39,7 @@ function bowl_create_enabled_fields ( $title = "Enabled", $offLabel = "Off", $on
 function bowl_create_enabled_conditional_fields ( $label = "Enabled", $default = 1, $key = 'enabled', $offLabel = "Off", $onLabel = "On" ) {
 	return [
 		bowl_create_enabled_fields( $label, $offLabel, $onLabel, $default, $key ),
-		ConditionalLogic::if( $key )->equals( 1 )
+		ConditionalLogic::where( $key )->equals( 1 )
 	];
 }
 
@@ -70,7 +70,7 @@ function bowl_create_conditional_group ( $label, $key, $choiceFields ) {
 			->wrapper(['class' => 'conditionalGroup'])
 			->fields( $fields )
 			->conditionalLogic([
-				ConditionalLogic::if( $enabledKey )->equals( $slugified )
+				ConditionalLogic::where( $enabledKey )->equals( $slugified )
 			]);
 	}
 	return $output;
