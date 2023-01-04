@@ -1,7 +1,7 @@
 <?php
 
-use Extended\ACF\FieldGroup;
 use Extended\ACF\Fields\Group;
+use Extended\ACF\Key;
 use Extended\ACF\Location;
 
 /**
@@ -123,12 +123,12 @@ class BowlFields {
 					add_filter( 'wpm_post_'.$fields->_id.'_config', function () { return []; });
 				// Disable sitemap on this post type
 				// TODO
-//				if ( isset($fields->sitemap) && $fields->sitemap === false ) {
-//					global $_bowlSitemapRemovedPostTypes;
-//					if (is_null($_bowlSitemapRemovedPostTypes))
-//						$_bowlSitemapRemovedPostTypes = [];
-//					$_bowlSitemapRemovedPostTypes[] = $fields->name;
-//				}
+				//				if ( isset($fields->sitemap) && $fields->sitemap === false ) {
+				//					global $_bowlSitemapRemovedPostTypes;
+				//					if (is_null($_bowlSitemapRemovedPostTypes))
+				//						$_bowlSitemapRemovedPostTypes = [];
+				//					$_bowlSitemapRemovedPostTypes[] = $fields->name;
+				//				}
 			}
 			// All pages
 			else if ( $fields->name == 'page' ) {
@@ -185,8 +185,8 @@ class BowlFields {
 			// We need to scope those field into template to avoid collisions of field names
 			// between same post type with different templates (if both have flexible for ex)
 			$fields->_id = $fields->_id."--".acf_slugify($fields->_template);
-//			dump("");
-//			dump($fields->_id);
+			//			dump("");
+			//			dump($fields->_id);
 			// Register new template for this post type
 			$type = $fields->type == "page" ? "page" : $fields->name;
 			add_filter( 'theme_'.$type.'_templates', function ($templates) use ($fields) {
@@ -194,7 +194,7 @@ class BowlFields {
 				return $templates;
 			});
 			// Register location
-//			$location[0]->and('post_template', $fields->_id);
+			//			$location[0]->and('post_template', $fields->_id);
 			$location[0] = Location::where('post_template', $fields->_id);
 		}
 		/**
@@ -215,31 +215,32 @@ class BowlFields {
 			$key = acf_slugify($fields->_id ?? $fields->name).'___'.$key;
 			$rawFields = isset( $group['rawFields'] ) && $group['rawFields'];
 			// Create FieldGroup
-			$fieldGroupObject = new FieldGroup(array_merge([
+			$fieldGroup = array_merge([
 				'title' => $group['title'],
-				'key' => $key,
+				'key' => Key::generate(Key::sanitize($key), 'group'),
 				// Set layout to non-null will show collapsible blocks
 				'layout' => (isset($group['noBorders']) && $group['noBorders'] ? null : ''),
-				'location' => $fields->location,
+				// Convert locations to array
+				'location' => array_map( fn ($location) => $location->get(), $fields->location ),
 				'fields' => (
 					// If rawFields is enabled, directly show fields without parent group
-					$rawFields ? $group['fields']
+				$rawFields ? array_map( fn ($field) => $field->get(), $group['fields'] )
 					// By default, show fields inside a nameless group
 					: [
-						// We use the unique key here to avoid collisions
-						Group::make(' ', $key )
-							->layout('row')
-							->instructions( $group['instructions'] ?? '' )
-							->fields( $group['fields'] )
-					]
+					// We use the unique key here to avoid collisions
+					Group::make(' ', $key )
+						->layout('row')
+						->instructions( $group['instructions'] ?? '' )
+						->fields( $group['fields'] )
+						->get()
+				]
 				)
-			], $group['options']));
-			// Convert to array and store key to order it later
-			$fieldGroupArray = $fieldGroupObject->toArray();
-			$fieldGroupsIDOrders[] = 'acf-'.$fieldGroupArray['key'];
-//			dump($fieldGroupArray);
+			], $group['options']);
+			// Store key to order it later
+			$fieldGroupsIDOrders[] = 'acf-'.$fieldGroup['key'];
+			//			dump($fieldGroup);
 			// Register this field group
-			register_field_group( $fieldGroupArray );
+			register_field_group( $fieldGroup );
 		}
 		// If we have info on field group orders
 		if ( isset($orderHookName) ) {
@@ -297,7 +298,7 @@ class BowlFields {
 				if ( $isPost )
 					$orderedMenu[] = $pageSection;
 			}
-//			foreach ( $newMenu as $index => $section ) dump($section);
+			//			foreach ( $newMenu as $index => $section ) dump($section);
 			// Override ordered global menu
 			$menu = $orderedMenu;
 		});
@@ -392,9 +393,9 @@ class BowlFields {
 					&& $location[0]['operator'] == "=="
 				) {
 					// FIXME : Why was that in an array ?
-//					if ( !isset($fields[$location[0]['value']]) )
-//						$fields[$location[0]['value']] = [];
-//					$fields[$location[0]['value']][] = $installedField;
+					//					if ( !isset($fields[$location[0]['value']]) )
+					//						$fields[$location[0]['value']] = [];
+					//					$fields[$location[0]['value']][] = $installedField;
 					$fields[$location[0]['value']] = $installedField;
 				}
 			}
@@ -512,7 +513,7 @@ class BowlFields {
 		else if ( $type == "collection" )
 			$this->_position = 6;
 		// Default name
-//		$this->_label = [$name];
+		//		$this->_label = [$name];
 	}
 
 	// ------------------------------------------------------------------------- MENU
