@@ -1,8 +1,8 @@
 <?php
 
-use WordPlate\Acf\FieldGroup;
-use WordPlate\Acf\Fields\Group;
-use WordPlate\Acf\Location;
+use Extended\ACF\FieldGroup;
+use Extended\ACF\Fields\Group;
+use Extended\ACF\Location;
 
 /**
  * TODO : Important
@@ -74,7 +74,7 @@ class BowlFields {
 		if ( $fields->type == "singleton" ) {
 			if ( !empty($fields->_label) ) {
 				// Set location, id and order
-				$location[] = Location::if( 'options_page', $fields->name );
+				$location[] = Location::where( 'options_page', $fields->name );
 				$fields->_id = 'toplevel_page_'.$fields->name;
 				// Register options page with ACF
 				acf_add_options_page(array_merge([
@@ -96,7 +96,7 @@ class BowlFields {
 		 */
 		else if ( $fields->type == "collection" ) {
 			// Set location, id and order
-			$location[] = Location::if( 'post_type', $fields->name );
+			$location[] = Location::where( 'post_type', $fields->name );
 			$fields->_id = $fields->name;
 			$orderHookName = $fields->name;
 			// Do not re-declare post as a post type
@@ -165,7 +165,7 @@ class BowlFields {
 				add_action('delete_post', $restrict_post_deletion, 10, 1);
 				foreach ( $fields->_pageIDs as $pageID ) {
 					// Register location
-					$location[] = Location::if( 'page', $pageID );
+					$location[] = Location::where( 'page', $pageID );
 					// Remove Wysiwyg editor
 					!$fields->_editor && bowl_remove_field_for_post( 'page', 'editor', $pageID );
 					!$fields->_excerpt && bowl_remove_field_for_post( 'page', 'excerpt', $pageID );
@@ -195,7 +195,7 @@ class BowlFields {
 			});
 			// Register location
 //			$location[0]->and('post_template', $fields->_id);
-			$location[0] = Location::if('post_template', $fields->_id);
+			$location[0] = Location::where('post_template', $fields->_id);
 		}
 		/**
 		 * REGISTER GROUPS

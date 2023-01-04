@@ -1,13 +1,13 @@
 <?php
 
-use WordPlate\Acf\Fields\Group;
-use WordPlate\Acf\Fields\Image;
-use WordPlate\Acf\Fields\Layout;
-use WordPlate\Acf\ConditionalLogic;
-use WordPlate\Acf\Fields\ButtonGroup;
-use WordPlate\Acf\Fields\PageLink;
-use WordPlate\Acf\Fields\Text;
-use WordPlate\Acf\Fields\WysiwygEditor;
+use Extended\ACF\Fields\Group;
+use Extended\ACF\Fields\Image;
+use Extended\ACF\Fields\Layout;
+use Extended\ACF\ConditionalLogic;
+use Extended\ACF\Fields\ButtonGroup;
+use Extended\ACF\Fields\PageLink;
+use Extended\ACF\Fields\Text;
+use Extended\ACF\Fields\WysiwygEditor;
 
 // ----------------------------------------------------------------------------- TITLE FIELD
 

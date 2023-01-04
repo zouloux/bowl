@@ -1,11 +1,11 @@
 <?php
 
-use WordPlate\Acf\Fields\Accordion;
-use WordPlate\Acf\Fields\ButtonGroup;
-use WordPlate\Acf\Fields\ColorPicker;
-use WordPlate\Acf\Fields\Image;
-use WordPlate\Acf\Fields\Repeater;
-use WordPlate\Acf\Fields\Text;
+use Extended\ACF\Fields\Accordion;
+use Extended\ACF\Fields\ButtonGroup;
+use Extended\ACF\Fields\ColorPicker;
+use Extended\ACF\Fields\Image;
+use Extended\ACF\Fields\Repeater;
+use Extended\ACF\Fields\Text;
 
 // ----------------------------------------------------------------------------- DICTIONARIES
 

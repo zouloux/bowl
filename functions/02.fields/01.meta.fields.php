@@ -1,8 +1,8 @@
 <?php
 
-use WordPlate\Acf\Fields\Image;
-use WordPlate\Acf\Fields\Text;
-use WordPlate\Acf\Fields\Textarea;
+use Extended\ACF\Fields\Image;
+use Extended\ACF\Fields\Text;
+use Extended\ACF\Fields\Textarea;
 
 // ----------------------------------------------------------------------------- META FIELDS
 
