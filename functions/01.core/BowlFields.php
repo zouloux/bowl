@@ -189,13 +189,14 @@ class BowlFields {
 			//			dump($fields->_id);
 			// Register new template for this post type
 			$type = $fields->type == "page" ? "page" : $fields->name;
+			$type = "page";
 			add_filter( 'theme_'.$type.'_templates', function ($templates) use ($fields) {
 				$templates[ $fields->_id ] = $fields->_template;
 				return $templates;
 			});
 			// Register location
 			//			$location[0]->and('post_template', $fields->_id);
-			$location[0] = Location::where('post_template', $fields->_id);
+			$location[0] = Location::where('post_template', "==", $fields->_id);
 		}
 		/**
 		 * REGISTER GROUPS
@@ -221,6 +222,7 @@ class BowlFields {
 				'key' => Key::generate(Key::sanitize($key), 'group'),
 				// Define menu order from declaration order
 				'menu_order' => ++$position,
+				'style' => (isset($group["seamless"]) && $group["seamless"]) ? "seamless" : "default",
 				// Convert locations to array
 				'location' => array_map( fn ($location) => $location->get(), $fields->location ),
 				'fields' => (
@@ -622,6 +624,10 @@ class BowlGroupFields
 
 	public function rawFields ( bool $value = true ) {
 		$this->_groupData['rawFields'] = $value;
+		return $this;
+	}
+	public function seamless ( bool $value = true ) {
+		$this->_groupData['seamless'] = $value;
 		return $this;
 	}
 	public function fields ( array $fields ) {
