@@ -1,5 +1,7 @@
 <?php
 
+use PHPMailer\PHPMailer\PHPMailer;
+
 // ----------------------------------------------------------------------------- REMOVE OEMBED
 // = emoji support in back and front-end
 
@@ -30,3 +32,22 @@ remove_action( 'shutdown', 'wp_ob_end_flush_all', 1 );
 add_action( 'shutdown', function() {
 	while ( @ob_end_flush() );
 });
+
+// ----------------------------------------------------------------------------- MAIL CONFIG
+
+// Register SMTP email with HTML support.
+add_action('phpmailer_init', function (PHPMailer $mail) {
+	$mail->isSMTP();
+	$mail->SMTPAutoTLS = false;
+	$mail->SMTPAuth = env('MAIL_USERNAME') && env('MAIL_PASSWORD');
+	$mail->SMTPSecure = env('MAIL_ENCRYPTION', 'tls');
+	$mail->Host = env('MAIL_HOST');
+	$mail->Port = env('MAIL_PORT', 587);
+	$mail->Username = env('MAIL_USERNAME');
+	$mail->Password = env('MAIL_PASSWORD');
+	return $mail;
+});
+
+add_filter('wp_mail_content_type', fn () => 'text/html');
+add_filter('wp_mail_from_name', fn () => env('MAIL_FROM_NAME', env('MAIL_USERNAME')));
+add_filter('wp_mail_from', fn () => env('MAIL_FROM_ADDRESS', env('MAIL_USERNAME')));
