@@ -207,6 +207,7 @@ class BowlFields {
 		// Ordered IDs of field groups
 		$fieldGroupsIDOrders = [];
 		// Process all groups for this screen
+		$position = 0;
 		foreach ( $fields->_groups as $key => $groupObject ) {
 			$group = $groupObject->toArray();
 			// Set a key from screen and group name to avoid collisions across screens
@@ -218,23 +219,23 @@ class BowlFields {
 			$fieldGroup = array_merge([
 				'title' => $group['title'],
 				'key' => Key::generate(Key::sanitize($key), 'group'),
-				// Set layout to non-null will show collapsible blocks
-				'layout' => (isset($group['noBorders']) && $group['noBorders'] ? null : ''),
+				// Define menu order from declaration order
+				'menu_order' => ++$position,
 				// Convert locations to array
 				'location' => array_map( fn ($location) => $location->get(), $fields->location ),
 				'fields' => (
 					// If rawFields is enabled, directly show fields without parent group
-				$rawFields ? array_map( fn ($field) => $field->get(), $group['fields'] )
+					$rawFields ? array_map( fn ($field) => $field->get(), $group['fields'] )
 					// By default, show fields inside a nameless group
 					: [
-					// We use the unique key here to avoid collisions
-					Group::make(' ', $key )
-						->layout('row')
-						->instructions( $group['instructions'] ?? '' )
-						->fields( $group['fields'] )
-						->get()
-				]
-				)
+						// We use the unique key here to avoid collisions
+						Group::make(' ', $key )
+							->layout('row')
+							->instructions( $group['instructions'] ?? '' )
+							->fields( $group['fields'] )
+							->get()
+					]
+				),
 			], $group['options']);
 			// Store key to order it later
 			$fieldGroupsIDOrders[] = 'acf-'.$fieldGroup['key'];
@@ -621,10 +622,6 @@ class BowlGroupFields
 
 	public function rawFields ( bool $value = true ) {
 		$this->_groupData['rawFields'] = $value;
-		return $this;
-	}
-	public function noBorders ( bool $value = true ) {
-		$this->_groupData['noBorders'] = $value;
 		return $this;
 	}
 	public function fields ( array $fields ) {
