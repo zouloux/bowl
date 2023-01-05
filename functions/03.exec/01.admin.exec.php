@@ -46,8 +46,12 @@ if ( defined('BOWL_ADMIN_LOAD_CUSTOM_ASSETS') && BOWL_ADMIN_LOAD_CUSTOM_ASSETS )
 
 // Remove page attribute panel to disable nested pages (parenting)
 if ( defined('BOWL_DISABLE_NESTED_PAGES') && BOWL_DISABLE_NESTED_PAGES ) {
-	add_action( 'init', function () {
-		remove_post_type_support('page','page-attributes');
+	//	add_action( 'init', function () {
+	//		remove_post_type_support('page','page-attributes');
+	//	});
+	add_action( 'admin_init', function () {
+		$style = "#pageparentdiv .inside .parent-id-label-wrapper, #parent_id { display: none; }";
+		bowl_inject_custom_admin_resource_for_screen(null, $style, "");
 	});
 }
 
@@ -86,7 +90,7 @@ if ( defined('BOWL_DISABLE_META_BOX_DRAGGABLE') && BOWL_DISABLE_META_BOX_DRAGGAB
 		if ( !in_array($pagenow, ['post-new.php', 'post.php', 'admin.php']) ) return;
 		// Remove original drag and drop and open / close for all meta boxes
 		$style = ".postbox .handle-order-higher, .postbox .handle-order-lower { display: none }\n";
-		$style .= ".postbox .postbox-header .handlediv { display: none; }\n";
+		//$style .= ".postbox .postbox-header .handlediv { display: none; }\n";
 		$style .= ".postbox .postbox-header .hndle { pointer-events: none; }\n";
 		// IMPORTANT NOTE : Do not use this, it will prevent usage of all "edit" buttons on admin !
 		// wp_deregister_script('postbox');
@@ -139,13 +143,13 @@ add_action('add_meta_boxes', function () {
 
 add_filter( 'mce_buttons', function ($buttons) {
 	return (
-		( defined('BOWL_MCE_BUTTONS') && isset(BOWL_MCE_BUTTONS[0]) )
+	( defined('BOWL_MCE_BUTTONS') && isset(BOWL_MCE_BUTTONS[0]) )
 		? BOWL_MCE_BUTTONS[0] : $buttons
 	);
 });
 add_filter( 'mce_buttons_2', function ($buttons) {
 	return (
-		( defined('BOWL_MCE_BUTTONS') && isset(BOWL_MCE_BUTTONS[1]) )
+	( defined('BOWL_MCE_BUTTONS') && isset(BOWL_MCE_BUTTONS[1]) )
 		? BOWL_MCE_BUTTONS[1] : $buttons
 	);
 });
@@ -171,6 +175,6 @@ add_filter('tiny_mce_before_init', function ( $init ) {
 
 add_action( 'customize_register', function ( $wp_customize ) {
 	if ( defined('BOWL_REMOVE_THEME_CUSTOMIZE_SECTIONS') && is_array(BOWL_REMOVE_THEME_CUSTOMIZE_SECTIONS) )
-	foreach ( BOWL_REMOVE_THEME_CUSTOMIZE_SECTIONS as $sectionName )
-		$wp_customize->remove_section( $sectionName );
+		foreach ( BOWL_REMOVE_THEME_CUSTOMIZE_SECTIONS as $sectionName )
+			$wp_customize->remove_section( $sectionName );
 }, 30);
