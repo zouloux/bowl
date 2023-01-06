@@ -470,3 +470,36 @@ body.wp-admin #wpcontent {
   border-radius: 50%;
   margin-right: 9px;
 }
+
+/* Patch range number input width */
+.acf-range-wrap input[type=number] {
+  min-width: 4rem;
+}
+
+/* Bowl enabled fields are moved into the flexible title bar */
+.acf-field.bowlEnabledField {
+  position: absolute;
+  top: -45px;
+  right: 120px;
+  display: flex;
+}
+.acf-field.bowlEnabledField:before {
+  display: none !important;
+}
+.acf-field.bowlEnabledField .acf-label {
+  white-space: nowrap;
+  float: none !important;
+  width: auto !important;
+}
+.acf-field.bowlEnabledField .acf-button-group {
+  height: 22px;
+}
+.acf-field.bowlEnabledField .acf-button-group > label {
+  padding: 1px 6px;
+}
+.acf-field.bowlEnabledField .acf-button-group .selected:nth-child(1) {
+  background: rgba(190, 20, 0)
+}
+.acf-field.bowlEnabledField .acf-button-group .selected:nth-child(2) {
+  background: rgba(0, 200, 0)
+}

@@ -43,6 +43,17 @@ function bowl_create_enabled_conditional_fields ( $label = "Enabled", $default =
 	];
 }
 
+
+// ----------------------------------------------------------------------------- ENABLED FLEXIBLE
+// An enabled field which is on top of the flexible block
+
+function bowl_create_enable_field ( $choices = [ "Disabled", "Enabled" ], $key = "enabled" ) {
+	return ButtonGroup::make("", $key)
+		->choices( $choices )->defaultValue( 1 )
+		->wrapper(["class" => "bowlEnabledField"]);
+}
+
+
 // ----------------------------------------------------------------------------- CONDITIONAL GROUP
 
 /**
