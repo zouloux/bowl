@@ -53,7 +53,7 @@ function bowl_create_enabled_conditional_fields ( $label = "Enabled", $default =
  */
 function bowl_create_conditional_group ( $label, $key, $choiceFields ) {
 	// Key for button group
-	$enabledKey = 'selectorGroup_selected';
+	$enabledKey = $key.'Group_selected';
 	// Convert choices to "my-choice" => "My Choice"
 	$choices = [];
 	foreach ( $choiceFields as $choice => $fields )

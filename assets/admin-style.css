@@ -108,8 +108,7 @@ html body {
 }
 
 /* No label on field */
-.acf-field.noLabel:before,
-.acf-field.noLabel > .acf-label {
+.acf-field.noLabel:before {
   display: none !important;
 }
 .acf-field.noLabel > .acf-input {
