@@ -79,8 +79,23 @@ html body {
   margin: 3px 10px 10px 0;
 }
 .inside.acf-fields > .acf-field.acf-field-group > .acf-label,
+  /*.acf-field.clean > .acf-label {*/
+  /*  display: none;*/
+  /*}*/
 .acf-field.clean > .acf-label {
+  margin: 0;
+  padding: 0;
+}
+.acf-field.clean > .acf-label > * {
   display: none;
+}
+.acf-field.clean > .acf-label > p.description {
+  display: block;
+  padding-left: 18px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #ccc;
+  margin: 0;
 }
 .inside.acf-fields > .acf-field.acf-field-group > .acf-input > *,
 .acf-field.clean > .acf-input > *,
