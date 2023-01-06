@@ -412,40 +412,38 @@ body.wp-admin #wpcontent {
 
 /* Side bar is fixed in desktop */
 @media (min-width: 850px) {
-  #wpm-language-switcher {
-    /*width: calc(100% - 300px) !important;*/
+  .post-php #wpm-language-switcher {
     position: fixed;
     top: 51px;
     left: 200px;
     z-index: 100;
-    right: 320px;
     background: #f0f0f1;
     height: 27px;
-    width: calc(100% - 510px) !important;
+    width: calc(100% - 520px) !important;
     padding-top: 15px;
     padding-left: 17px;
   }
-  #wpbody-content #post-body.columns-2 #postbox-container-1 {
+  .post-php #wpbody-content #post-body.columns-2 #postbox-container-1 {
     position: fixed;
     right: 13px;
-    top: 76px;
+    top: 68px;
     margin-right: 0;
     float: none;
   }
-  #screen-meta {
+  .post-php #screen-meta {
     position: relative;
     top: 42px;
     margin-right: 320px;
   }
-  #screen-meta-links {
+  .post-php #screen-meta-links {
     position: relative;
     top: 42px;
     right: 0;
     z-index: 100;
     margin-right: 320px;
   }
-  #message,
-  #post > .acf-notice {
+  .post-php #message,
+  .post-php #post > .acf-notice {
     margin-right: 300px;
   }
 }
