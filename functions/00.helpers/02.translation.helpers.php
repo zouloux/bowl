@@ -92,7 +92,7 @@ function bowl_translate_field_title ( string $fieldTitle ) {
 	$locales = bowl_get_locale_list();
 	if ( count($locales) <= 1 )
 		return $fieldTitle;
-	return $fieldTitle.' <span class="bowl_translated">(<strong>'.strtoupper(bowl_get_current_locale()).'</strong> translation)</span>';
+	return $fieldTitle.' <span class="bowl_translated">['.strtoupper(bowl_get_current_locale()).']</span>';
 }
 
 /**
