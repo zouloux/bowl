@@ -70,19 +70,21 @@ function bowl_create_conditional_group ( $label, $key, $choiceFields ) {
 			->wrapper(['class' => 'noLabel'])
 			->choices( $choices )
 	];
-	// Browse choices
-	foreach ( $choiceFields as $choice => $fields ) {
-		$slugified = acf_slugify($choice);
-
+	// Browse choices and map to correct field
+	$c = array_keys( $choices );
+	$v = array_values( $choiceFields );
+	foreach ( $c as $index => $choiceSlug ) {
+		// Target fields from choice index
+		$fields = $v[ $index ];
 		// Do not create empty groups
-		if (empty($fields)) continue;
+		if ( empty($fields) ) continue;
 		// Create group and connect it to correct choice
-		$output[] = Group::make(' ', 'selectorGroup_'.$slugified)
+		$output[] = Group::make(' ', 'selectorGroup_'.$choiceSlug)
 			->layout("row")
 			->wrapper(['class' => 'conditionalGroup'])
 			->fields( $fields )
 			->conditionalLogic([
-				ConditionalLogic::where( $enabledKey, "==", $slugified )
+				ConditionalLogic::where( $enabledKey, "==", $choiceSlug )
 			]);
 	}
 	return $output;

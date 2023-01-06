@@ -111,6 +111,9 @@ html body {
 .acf-field.noLabel:before {
   display: none !important;
 }
+.acf-field.noLabel > .acf-label > label {
+  transform: translate(0, -5px);
+}
 .acf-field.noLabel > .acf-input {
   width: 100% !important;
 }
