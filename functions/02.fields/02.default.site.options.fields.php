@@ -18,8 +18,8 @@ function bowl_create_dictionaries_fields_group ( string $title = "Dictionaries" 
 			->layout('row')
 			->fields([
 				bowl_create_title_field('Dictionary ID', 'id'),
-				Accordion::make(bowl_translate_field_title('Translations'), 'accordion'),
-				Repeater::make(' ', bowl_translate_field_name('data'))
+				Accordion::make(bowl_translate_label('Translations'), 'accordion'),
+				Repeater::make(' ', bowl_translate_field('data'))
 					->buttonLabel("Add translation")
 					->layout('table')
 					->wrapper(['class' => 'clean'])
@@ -135,8 +135,8 @@ function bowl_create_menu_fields_group ( string $id, string $title = "menu") {
 	$group->fields([
 		Repeater::make(' ', $id)->fields( [
 			bowl_create_page_link_field(),
-			Text::make(' ', bowl_translate_field_name('title'))
-				->instructions(bowl_translate_field_title('Title override (Optional)')) // TODO argument
+			Text::make(' ', bowl_translate_field('title'))
+				->instructions(bowl_translate_label('Title override (Optional)')) // TODO argument
 		])
 	]);
 	return $group;
