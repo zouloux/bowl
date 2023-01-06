@@ -56,8 +56,14 @@ function bowl_create_conditional_group ( $label, $key, $choiceFields ) {
 	$enabledKey = $key.'Group_selected';
 	// Convert choices to "my-choice" => "My Choice"
 	$choices = [];
-	foreach ( $choiceFields as $choice => $fields )
-		$choices[ acf_slugify($choice) ] = $choice;
+	// Allow keys to be like "disabled/Désactivé" to convert to ["disabled" => "Désactivé"]
+	foreach ( $choiceFields as $choice => $fields ) {
+		$split = explode("/", $choice, 2);
+		if ( count($split) === 2 )
+			$choices[ acf_slugify($split[0]) ] = $split[1];
+		else
+			$choices[ acf_slugify($choice) ] = $choice;
+	}
 	// Generate button group
 	$output = [
 		ButtonGroup::make( $label, $enabledKey )
@@ -67,6 +73,7 @@ function bowl_create_conditional_group ( $label, $key, $choiceFields ) {
 	// Browse choices
 	foreach ( $choiceFields as $choice => $fields ) {
 		$slugified = acf_slugify($choice);
+
 		// Do not create empty groups
 		if (empty($fields)) continue;
 		// Create group and connect it to correct choice
