@@ -94,11 +94,11 @@ if ( defined('BOWL_DISABLE_META_BOX_DRAGGABLE') && BOWL_DISABLE_META_BOX_DRAGGAB
 		$style .= ".postbox .postbox-header .hndle { pointer-events: none; }\n";
 		// IMPORTANT NOTE : Do not use this, it will prevent usage of all "edit" buttons on admin !
 		// wp_deregister_script('postbox');
-		// $script = "window._customMetaboxBehavior = true;";
+		$script = "window._customMetaboxBehavior = true;";
 		// IMPORTANT NOTE : Do not remove this class, ACF will crashes when changing template in admin
 		// Remove hndle class will disable draggable on meta boxes
 		//$script = "jQuery(document).ready(function (\$) {\$('.postbox .postbox-header .hndle').removeClass('hndle');});";
-		bowl_inject_custom_admin_resource_for_screen(null, $style, "");
+		bowl_inject_custom_admin_resource_for_screen(null, $style, $script);
 	});
 }
 

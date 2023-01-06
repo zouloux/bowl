@@ -15,12 +15,14 @@ function initCustomMetaBoxBehavior ( $ )
 function patchFlexibleBehavior ( $ )
 {
   // Invert flexible layouts collapsed state when we click on flexible content title
-  var $flexibleLabel = $('.acf-field-flexible-content .acf-label');
+  var $flexibleLabel = $('.acf-field-flexible-content > .acf-label > label');
   if ( $flexibleLabel.length > 0 )
   {
     var opened = true;
     var collapsedClass = '-collapsed';
-    $flexibleLabel.on('click', function (e) {
+    $flexibleLabel
+    .text( $flexibleLabel.text() + " ↕️" )
+    .on('click', function (e) {
       var $layouts = $(e.currentTarget).parent().parent().find('.values > .layout');
       opened = !opened;
       opened ? $layouts.removeClass(collapsedClass) : $layouts.addClass(collapsedClass);
@@ -28,11 +30,9 @@ function patchFlexibleBehavior ( $ )
   }
 }
 
-jQuery(document).ready( function ($)
-{
+jQuery(document).ready( function ($) {
   // Check if we removed postbox script at admin_init (in admin.config.php)
-  if (window._customMetaboxBehavior)
-  {
+  if (window._customMetaboxBehavior) {
     initCustomMetaBoxBehavior($);
     patchFlexibleBehavior($)
   }
