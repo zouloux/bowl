@@ -83,19 +83,23 @@ html body {
   /*  display: none;*/
   /*}*/
 .acf-field.clean > .acf-label {
-  margin: 0;
-  padding: 0;
+  margin: 0 !important;
+  padding: 0 !important;
+  clear: both;
+  float: none;
+  width: 100% !important;
 }
 .acf-field.clean > .acf-label > * {
   display: none;
 }
 .acf-field.clean > .acf-label > p.description {
   display: block;
-  padding-left: 18px;
+  padding-left: 11px;
   padding-top: 8px;
   padding-bottom: 8px;
-  border-bottom: 1px solid #ccc;
-  margin: 0;
+  border-bottom: 1px solid #eee;
+  border-top: 1px solid #ccc;
+  margin: -1px 0 0 0 !important;
 }
 .inside.acf-fields > .acf-field.acf-field-group > .acf-input > *,
 .acf-field.clean > .acf-input > *,
@@ -126,7 +130,8 @@ html body {
 
 /* Bowl translated */
 .bowl_translated {
-  color: rgba(220, 80, 80);
+  /*color: rgba(220, 80, 80);*/
+  color: rgb(214, 105, 255);
   font-weight: bold;
 }
 
@@ -452,4 +457,13 @@ body.wp-admin #wpcontent {
 /* Hide help text on post attribute box */
 #pageparentdiv .post-attributes-help-text {
   display: none;
+}
+
+/* Better admin bar */
+#wpadminbar #wp-admin-bar-my-account.with-avatar > a img {
+  transform: scale(2.1);
+  margin-left: 20px;
+  border: 0;
+  border-radius: 50%;
+  margin-right: 9px;
 }
