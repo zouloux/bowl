@@ -503,3 +503,15 @@ body.wp-admin #wpcontent {
 .acf-field.bowlEnabledField .acf-button-group .selected:nth-child(2) {
   background: rgba(0, 200, 0)
 }
+
+/* Patch duplicate icon */
+.acf-icon.-duplicate:before {
+  top: 15%;
+  left: 13%;
+  box-shadow: none;
+  content: "\f105";
+  font-family: dashicons;
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+}
