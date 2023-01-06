@@ -9,7 +9,7 @@ function bowl_get_current_locale () {
 	global $_bowlCurrentLocale;
 	if ( !isset($_bowlCurrentLocale) ) {
 		$_bowlCurrentLocale = (
-			function_exists('wpm_get_language')
+		function_exists('wpm_get_language')
 			? wpm_get_language()
 			: ''
 		);
@@ -81,14 +81,14 @@ function bowl_get_locale_switcher ( $pageData = null ) {
  * Get translated field key.
  * For example : "description" in french locale will give "fr_description"
  */
-function bowl_translate_field_name ( string $fieldName ) {
+function bowl_translate_field ( string $fieldName ) {
 	return bowl_get_current_locale().'_'.$fieldName;
 }
 
 /**
  * Add a "translated field" next to translatable field titles
  */
-function bowl_translate_field_title ( string $fieldTitle ) {
+function bowl_translate_label ( string $fieldTitle ) {
 	$locales = bowl_get_locale_list();
 	if ( count($locales) <= 1 )
 		return $fieldTitle;
@@ -117,7 +117,7 @@ function remove_locale_from_href ( string $href ) : string {
  */
 function bowl_fix_translated_string ( $string ) {
 	return (
-		function_exists('wpm_translate_string')
+	function_exists('wpm_translate_string')
 		? wpm_translate_string( $string )
 		: $string
 	);
