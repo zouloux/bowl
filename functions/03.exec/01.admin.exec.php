@@ -59,8 +59,17 @@ if ( defined('BOWL_DISABLE_NESTED_PAGES') && BOWL_DISABLE_NESTED_PAGES ) {
 
 // Disable blog feature
 if ( defined('BOWL_DISABLE_NEWS') && BOWL_DISABLE_NEWS ) {
-	add_action('admin_menu', function () {
-		remove_menu_page('edit.php');
+
+	// FIXME : Does not work any more ? it will remove post and page
+	//	add_action('admin_menu', function () {
+	//		remove_menu_page('edit.php');
+	//		global $menu;
+	//		dd($menu);
+	//	});
+	// FIXME : So remove only with CSS ...
+	add_action( 'admin_init', function () {
+		$style = "#menu-posts { display: none; }";
+		bowl_inject_custom_admin_resource_for_screen(null, $style, "");
 	});
 	add_action('wp_before_admin_bar_render', function () {
 		global $wp_admin_bar;

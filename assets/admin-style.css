@@ -134,6 +134,9 @@ html body {
   color: rgb(214, 105, 255);
   font-weight: bold;
 }
+.acf-tooltip .bowl_translated {
+  display: none;
+}
 
 /* Conditional group */
 .acf-fields.-left > .acf-field-group.conditionalGroup {
