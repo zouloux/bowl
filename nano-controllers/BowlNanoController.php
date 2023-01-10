@@ -52,12 +52,10 @@ class BowlNanoController
 	 * Useful to have cachable Bowl objects classes loaded without loading WordPress entirely.
 	 */
 	function loadCachableClasses () {
-		if ( !defined("ABSPATH") )
-			define("ABSPATH", __DIR__."/../../..");
 		// Load WP_Post
-		require_once ABSPATH.'/wordpress/wp-includes/class-wp-post.php';
+		require_once __DIR__.'/../../../wordpress/wp-includes/class-wp-post.php';
 		// Load all Bowl classes
-		$directory = ABSPATH.'/mu-plugins/bowl/functions/01.core/';
+		$directory = __DIR__.'/../../../mu-plugins/bowl/functions/01.core/';
 		$files = scandir($directory);
 		foreach ( $files as $file ) {
 			if ( $file === "." || $file === ".." ) continue;
