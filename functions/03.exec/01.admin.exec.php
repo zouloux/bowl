@@ -187,3 +187,9 @@ add_action( 'customize_register', function ( $wp_customize ) {
 		foreach ( BOWL_REMOVE_THEME_CUSTOMIZE_SECTIONS as $sectionName )
 			$wp_customize->remove_section( $sectionName );
 }, 30);
+
+// Clear APCU cache on post saving
+add_action( 'save_post', function () {
+	if ( class_exists("\Nano\core\Nano") )
+		\Nano\core\Nano::cacheClear();
+}, 0);
