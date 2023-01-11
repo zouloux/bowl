@@ -103,6 +103,13 @@ class BowlNanoController
 	// ------------------------------------------------------------------------- LOCALE
 
 	function redirectToBrowserLocale () {
+		$this->loadWordpress();
+		// FIXME : Optimize
+		//		$l = wpm()->setup->get_languages();
+		//		$d = wpm()->setup->get_default_language();
+		//		dump($d);
+		//		dump($l);
+		//		exit;
 		$userLanguage = wpm()->setup->get_user_language();
 		Nano::redirect( Nano::getURL('wordpressPage', ['lang' => $userLanguage]) );
 	}
