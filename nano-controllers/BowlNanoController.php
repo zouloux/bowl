@@ -97,21 +97,35 @@ class BowlNanoController
 
 	function getCurrentBowlPost () {
 		$path = Nano::getRequestPath( false );
+		$path = strtolower( $path );
 		return BowlRequest::getBowlPostByPath( $path );
 	}
 
 	// ------------------------------------------------------------------------- LOCALE
 
-	function redirectToBrowserLocale () {
-		$this->loadWordpress();
-		// FIXME : Optimize
-		//		$l = wpm()->setup->get_languages();
-		//		$d = wpm()->setup->get_default_language();
-		//		dump($d);
-		//		dump($l);
-		//		exit;
-		$userLanguage = wpm()->setup->get_user_language();
-		Nano::redirect( Nano::getURL('wordpressPage', ['lang' => $userLanguage]) );
+	function getUserLocale () {
+		// Get locale info from wpm
+		// Load Wordpress once.
+		// FIXME : Clear cache when updating languages in WPM ? Or just any post to refresh it ?
+		$localesData = $this->cache("__localesData", function () {
+			$this->loadWordpress();
+			return [
+				'languages' => wpm()->setup->get_languages(),
+				'default' => wpm()->setup->get_default_language()
+			];
+		});
+		$allLocales = array_keys( $localesData['languages'] );
+		// Get user locale
+		$browserLocale = strtolower( substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2) );
+		// FIXME : Parse all user locales and order them
+		$locale = $localesData["default"];
+		if ( in_array($browserLocale, $allLocales) )
+			$locale = $browserLocale;
+		// TODO : Check cookie for user selected locale
+		return $locale;
+		// Old system :
+		//		$userLanguage = wpm()->setup->get_user_language();
+		//		Nano::redirect( Nano::getURL($route, ['lang' => $userLanguage]) );
 	}
 
 	// ------------------------------------------------------------------------- WEBSITE RESPONDERS
