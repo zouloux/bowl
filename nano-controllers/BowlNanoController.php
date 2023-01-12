@@ -18,7 +18,7 @@ class BowlNanoController
 	 * Will load Wordpress libs / plugins / theme, but not run any query.
 	 */
 	function loadWordpress () {
-		if ($this->_isWordpressLoaded) return;
+		if ( $this->_isWordpressLoaded ) return;
 		require_once Nano::path('wordpress', 'wp-load.php');
 		$this->_isWordpressLoaded = true;
 		// Enable WP query profiling
@@ -48,46 +48,10 @@ class BowlNanoController
 	}
 
 	/**
-	 * Load WP_Post and Bowl classes.
-	 * Useful to have cachable Bowl objects classes loaded without loading WordPress entirely.
-	 */
-	function loadCachableClasses () {
-		// Load WP_Post
-		require_once __DIR__.'/../../../wordpress/wp-includes/class-wp-post.php';
-		// Load all Bowl classes
-		$directory = __DIR__.'/../../../mu-plugins/bowl/functions/01.core/';
-		$files = scandir($directory);
-		foreach ( $files as $file ) {
-			if ( $file === "." || $file === ".." ) continue;
-			require_once $directory.$file;
-		}
-	}
-
-	/**
-	 * Cache automatically BowlPosts or BowlData requests.
-	 * Will not load WordPress when retrieving cache for better perfs.
-	 * @param string $key Cache key
-	 * @param callable $getHandler Handler called when cache key is not found to retrieve cached object.
-	 * @return mixed
-	 * @throws Exception
-	 */
-	function cache ( string $key, callable $getHandler ) {
-		$key = "_wordpress_".$key;
-		$profiling = NanoDebug::profile("Cache [$key]");
-		$result = Nano::cacheDefine( $key, function () use ($getHandler) {
-			Nano::action("Bowl", "loadWordpress");
-			return $getHandler();
-		}, fn () => $this->loadCachableClasses());
-		$profiling();
-		return $result;
-	}
-
-	/**
 	 * Will run and exec main Wordpress query.
 	 */
 	function startWordpress () {
-		if ( !$this->_isWordpressLoaded )
-			$this->loadWordpress();
+		$this->loadWordpress();
 		define('WP_USE_THEMES', true);
 		wp();
 		require_once ABSPATH . WPINC . '/template-loader.php';
@@ -96,6 +60,7 @@ class BowlNanoController
 	// ------------------------------------------------------------------------- BOWL POSTS
 
 	function getCurrentBowlPost () {
+		$this->loadWordpress();
 		$path = Nano::getRequestPath( false );
 		$path = strtolower( $path );
 		return BowlRequest::getBowlPostByPath( $path );
@@ -107,7 +72,7 @@ class BowlNanoController
 	// Load WordPress once.
 	function getCachedLocaleData () {
 		// FIXME : Clear cache when updating languages in WPM ? Or just any post to refresh it ?
-		return $this->cache("__localesData", function () {
+		return Nano::cacheDefine("__bowl__localesData", function () {
 			$this->loadWordpress();
 			return [
 				'languages' => wpm()->setup->get_languages(),
@@ -127,9 +92,6 @@ class BowlNanoController
 			$locale = $browserLocale;
 		// TODO : Check cookie for user selected locale
 		return $locale;
-		// Old system :
-		//		$userLanguage = wpm()->setup->get_user_language();
-		//		Nano::redirect( Nano::getURL($route, ['lang' => $userLanguage]) );
 	}
 
 	// ------------------------------------------------------------------------- WEBSITE RESPONDERS
@@ -153,7 +115,7 @@ class BowlNanoController
 		foreach ( $allPost as $post ) {
 			$sitemapPages[] = [
 				'href' => $post->href,
-				'lastModified' => $post->timestamp,
+				'lastModified' => $post->date->getTimestamp(),
 			];
 		}
 		if ( $filterPages )
