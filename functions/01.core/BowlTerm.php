@@ -20,4 +20,8 @@ class BowlTerm
 		$this->href = bowl_remove_base_from_href( get_category_link( $source ) );
 		$this->parentID = $source->parent;
 	}
+
+	public function toArray () {
+		return BowlPost::recursiveToArray($this);
+	}
 }

@@ -64,7 +64,7 @@ class BowlPost
 		$this->_source = $post;
 		// Get post properties
 		$this->id = $post->ID;
-		$this->title = $post->post_title;
+		$this->title = bowl_fix_translated_string($post->post_title ?? "");
 		$this->href = get_permalink( $post );
 		$this->type = $post->post_type;
 		$this->isPublished = $post->post_status == "publish";
@@ -114,5 +114,29 @@ class BowlPost
 	public function fetchAuthor () {
 		$authorID = intval( $this->_source->post_author );
 		$this->author = new BowlAuthor( $authorID );
+	}
+
+	// ------------------------------------------------------------------------- TO ARRAY
+
+	/**
+	 * Serialize a bowl element into an array recursively.
+	 * Will skip _source to avoid having deep inclusion of WP_Post
+	 */
+	public static function recursiveToArray ( $element ) {
+		if ( is_object( $element ) )
+			$vars = get_object_vars( $element );
+		else if ( is_array($element) )
+			$vars = $element;
+		else
+			throw new Exception("BowlPost::recursiveToArray // Invalid element.");
+		unset( $vars["_source"] );
+		foreach ( $vars as $key => $value )
+			if ( is_object($value) || is_array($value) )
+				$vars[ $key ] = self::recursiveToArray( $value );
+		return $vars;
+	}
+
+	public function toArray () {
+		return self::recursiveToArray($this);
 	}
 }

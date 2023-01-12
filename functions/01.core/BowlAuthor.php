@@ -29,4 +29,8 @@ class BowlAuthor
 		$this->url = get_the_author_meta("user_url", $authorID);
 		$this->avatarHref = get_avatar_url( $authorID );
 	}
+
+	public function toArray () {
+		return BowlPost::recursiveToArray($this);
+	}
 }

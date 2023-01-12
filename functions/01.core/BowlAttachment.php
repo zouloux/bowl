@@ -37,6 +37,10 @@ class BowlAttachment
 		$this->description = bowl_fix_translated_string($source['description'] ?? "");
 		$this->caption = bowl_fix_translated_string($source['caption'] ?? "");
 	}
+
+	public function toArray () {
+		return BowlPost::recursiveToArray($this);
+	}
 }
 
 trait BowlGraphicTrait

@@ -18,4 +18,8 @@ class BowlCategory
 		$this->slug = $source->slug;
 		$this->href = bowl_remove_base_from_href( get_category_link( $source ) );
 	}
+
+	public function toArray () {
+		return BowlPost::recursiveToArray($this);
+	}
 }
