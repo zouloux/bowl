@@ -420,7 +420,7 @@ body.wp-admin #wpcontent {
   .post-php #wpm-language-switcher {
     position: fixed;
     top: 51px;
-    left: 200px;
+    left: 199px;
     z-index: 100;
     background: #f0f0f1;
     height: 27px;
@@ -515,3 +515,21 @@ body.wp-admin #wpcontent {
   width: 1em;
   height: 1em;
 }
+
+
+/* Taxonomy add patched */
+.acf-taxonomy-field
+{
+  width: calc(100% - 30px);
+}
+.acf-taxonomy-field .acf-actions
+{
+  display: block !important;
+  margin: 0 !important;
+  right: -30px;
+  top: 4px;
+}
+
+
+
+
