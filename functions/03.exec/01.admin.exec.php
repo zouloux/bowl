@@ -188,8 +188,12 @@ add_action( 'customize_register', function ( $wp_customize ) {
 			$wp_customize->remove_section( $sectionName );
 }, 30);
 
-// Clear APCU cache on post saving
+// Clear Nano APCU cache on post and options saving
 add_action( 'save_post', function () {
+	if ( class_exists("\Nano\core\Nano") )
+		\Nano\core\Nano::cacheClear();
+}, 0);
+add_action( 'updated_option', function () {
 	if ( class_exists("\Nano\core\Nano") )
 		\Nano\core\Nano::cacheClear();
 }, 0);

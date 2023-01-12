@@ -103,17 +103,21 @@ class BowlNanoController
 
 	// ------------------------------------------------------------------------- LOCALE
 
-	function getUserLocale () {
-		// Get locale info from wpm
-		// Load Wordpress once.
+	// Get locale info from wpm
+	// Load WordPress once.
+	function getCachedLocaleData () {
 		// FIXME : Clear cache when updating languages in WPM ? Or just any post to refresh it ?
-		$localesData = $this->cache("__localesData", function () {
+		return $this->cache("__localesData", function () {
 			$this->loadWordpress();
 			return [
 				'languages' => wpm()->setup->get_languages(),
 				'default' => wpm()->setup->get_default_language()
 			];
 		});
+	}
+
+	function getUserLocale () {
+		$localesData = $this->getCachedLocaleData();
 		$allLocales = array_keys( $localesData['languages'] );
 		// Get user locale
 		$browserLocale = strtolower( substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2) );

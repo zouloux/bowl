@@ -530,6 +530,10 @@ body.wp-admin #wpcontent {
   top: 4px;
 }
 
-
+/* Disable order option in right box on pages. Useless because of reorder plugin */
+.menu-order-label-wrapper,
+#menu_order {
+  display: none;
+}
 
 
