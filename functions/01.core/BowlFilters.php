@@ -28,7 +28,7 @@ class BowlFilters
 	 * @param array|bool $autoFetchPostsWithTemplate
 	 * @return array
 	 */
-	protected static function recursivePatchFields ( array &$data, array|bool $autoFetchPostsWithTemplate = [] ):array {
+	static function recursivePatchFields ( array &$data, array|bool $autoFetchPostsWithTemplate = [] ):array {
 		$locale = bowl_get_current_locale();
 		// Filter translated keys
 		// Out of main loop because altering $data (otherwise node can be duplicated)
@@ -48,34 +48,64 @@ class BowlFilters
 		// Browse node properties
 		foreach ( $data as $key => &$node ) {
 			// Remove all data for a node when field enabled=false
-			if ( is_array($node) && isset($node['enabled']) && $node['enabled'] == false ) {
-				$data[ $key ] = [ 'enabled' => false ];
-				continue;
+			if ( is_array($node) && isset($node['enabled']) ) {
+				if ( !$node['enabled'] ) {
+					unset( $data[ $key ] );
+					continue;
+				}
+				else {
+					unset( $node['enabled'] );
+				}
+				//				$data[ $key ] = [ 'enabled' => false ];
+				//				continue;
 			}
 			// Convert flexible layouts to "type"
 			if ( $key === 'acf_fc_layout' ) {
 				$data += ['type' => $data[$key]];
 				unset( $data[$key] );
 			}
-			// Filter conditional groups
-			if (
-				is_array($node)
-				&& isset($node['selectorGroup_selected'])
-			) {
-				$node['selected'] = $node['selectorGroup_selected'];
-				unset($node['selectorGroup_selected']);
-				if ( isset($node['selectorGroup_'.$node['selected']]) )
-					$node += $node['selectorGroup_'.$node['selected']];
-				foreach ( $node as $k => $v ) {
-					if ( str_starts_with($k, 'selectorGroup_') )
-						unset($node[$k]);
+			// Filter conditional groups generated with ...bowl_create_conditional_group()
+			// Convert field groups like _webAppCapabilities_group_selected = 'ok'
+			// To something clean : webAppCapabilities => ["selected" => true, ...]
+			if ( is_array($node) ) {
+				// Get all keys of this node
+				$nk = array_keys($node);
+				$extractedKeyName = null;
+				$extractedValue = null;
+				// Browse keys
+				foreach ( $nk as $k ) {
+					// Check if a key starts with $_
+					// The first is always the selector ( ButtonGroup )
+					// This is why the $extractedKeyName var is reset out of this scope
+					if ( !str_starts_with($k, "\$_") ) continue;
+					if ( is_null($extractedKeyName) ) {
+						// Get key and value for this group
+						$parts = explode("_", $k, 3);
+						if ( count($parts) != 3 ) continue;
+						$extractedKeyName = $parts[1];
+						$extractedValue = $node[ $k ];
+					}
+					else {
+						// Create new node with correct key and selected value
+						if ( !isset($node[ $extractedKeyName ]) )
+							$node[ $extractedKeyName ] = [
+								"selected" => $extractedValue
+							];
+						// Compute searched selected key
+						$searchedSelectedKey = "\$_".$extractedKeyName.'_group_'.$extractedValue;
+						// We are on the selected group, inject data into the new node
+						if ( $k === $searchedSelectedKey )
+							$node[ $extractedKeyName ] += $node[ $k ];
+					}
+					// Unset all ( the selected one and not selected groups )
+					unset( $node[$k] );
 				}
 			}
 			// Filter WP_Post to BowlPost and auto fetch fields and sub posts
 			if ( $node instanceof WP_Post ) {
 				// If we need to fetch fields for this post
 				$fetchFields = (
-					is_bool($autoFetchPostsWithTemplate) ? $autoFetchPostsWithTemplate
+				is_bool($autoFetchPostsWithTemplate) ? $autoFetchPostsWithTemplate
 					: in_array(BowlPost::getTemplateNameFromWPPost( $node ), $autoFetchPostsWithTemplate)
 				);
 				// Recursively convert to BowlPost

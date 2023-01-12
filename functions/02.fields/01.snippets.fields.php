@@ -61,10 +61,12 @@ function bowl_create_enable_field ( $choices = [ "Disabled", "Enabled" ], $key =
  * ->fields([
  * 		...bowl_create_conditional_group()
  * ])
+ * NOTE : Parsed and filtered by BowlFilter::recursivePatchFields
  */
 function bowl_create_conditional_group ( $label, $key, $choiceFields ) {
 	// Key for button group
-	$enabledKey = $key.'Group_selected';
+	$groupKey = "\$_".$key.'_group';
+	$enabledKey = $groupKey.'_selected';
 	// Convert choices to "my-choice" => "My Choice"
 	$choices = [];
 	// Allow keys to be like "disabled/Désactivé" to convert to ["disabled" => "Désactivé"]
@@ -90,7 +92,7 @@ function bowl_create_conditional_group ( $label, $key, $choiceFields ) {
 		// Do not create empty groups
 		if ( empty($fields) ) continue;
 		// Create group and connect it to correct choice
-		$output[] = Group::make(' ', 'selectorGroup_'.$choiceSlug)
+		$output[] = Group::make(' ', $groupKey.'_'.$choiceSlug)
 			->layout("row")
 			->wrapper(['class' => 'conditionalGroup'])
 			->fields( $fields )
