@@ -197,3 +197,10 @@ add_action( 'updated_option', function () {
 	if ( class_exists("\Nano\core\Nano") )
 		\Nano\core\Nano::cacheClear();
 }, 0);
+
+// Add a class to offset screen-meta if we have multilang plugin
+add_filter("admin_body_class", function ($classes) {
+	if ( function_exists('wpm_get_language') )
+		$classes .= " has-wpm-plugin";
+	return $classes;
+});

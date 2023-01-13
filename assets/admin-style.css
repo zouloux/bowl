@@ -436,16 +436,21 @@ body.wp-admin #wpcontent {
     float: none;
   }
   .post-php #screen-meta {
-    position: relative;
-    top: 42px;
     margin-right: 320px;
   }
   .post-php #screen-meta-links {
-    position: relative;
-    top: 42px;
     right: 0;
     z-index: 100;
     margin-right: 320px;
+  }
+  .post-php #screen-meta,
+  .post-php #screen-meta-links {
+    position: relative;
+    top: 0;
+  }
+  body.has-wpm-plugin.post-php #screen-meta,
+  body.has-wpm-plugin.post-php #screen-meta-links {
+    top: 42px !important;
   }
   .post-php #message,
   .post-php #post > .acf-notice {
