@@ -536,4 +536,8 @@ body.wp-admin #wpcontent {
   display: none;
 }
 
-
+/* Small editor */
+.smallEditor iframe {
+  height: 100px !important;
+  min-height: 100px !important;
+}
