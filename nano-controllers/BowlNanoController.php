@@ -97,29 +97,32 @@ class BowlNanoController
 	// ------------------------------------------------------------------------- WEBSITE RESPONDERS
 
 	function printRobots () {
-		$allow = !get_option( 'blog_public' );
+		$allow = !!get_option( 'blog_public' );
 		Nano::action("Website", "printRobots", [
 			$allow ? ['*'] : [],
 			$allow ? [] : ['*'],
 		]);
 	}
 
-	function printSitemap ( callable $filterPages = null ) {
+	function printSitemap ( $postTypes = ["page", "posts"], callable $filterPages = null ) {
 		// TODO : Check if post exists in other languages
 		// TODO : Add pages with other locales
 		// TODO : Split in sub-sitemaps for performances, 1 by post-type
 		// TODO : 		Need to change API and declare routes in here
-		$allPost = BowlRequest::getAllBowlPosts();
-		$sitemapPages = [];
+		$allPost = BowlRequest::getAllBowlPosts( $postTypes );
+		$sitemapEntries = [];
 		/** @var BowlPost $post */
 		foreach ( $allPost as $post ) {
-			$sitemapPages[] = [
+			$sitemapEntries[] = [
 				'href' => $post->href,
 				'lastModified' => $post->date->getTimestamp(),
+				'post' => $post,
 			];
 		}
 		if ( $filterPages )
-			$sitemapPages = $filterPages( $sitemapPages );
-		Nano::action("Website", "printSitemap", [$sitemapPages]);
+			foreach ( $sitemapEntries as $key => $entry )
+				$sitemapEntries[$key] = $filterPages( $entry );
+		$sitemapEntries = array_filter($sitemapEntries, fn ($p) => $p !== false );
+		Nano::action("Website", "printSitemap", [$sitemapEntries]);
 	}
 }

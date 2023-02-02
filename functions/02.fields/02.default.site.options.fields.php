@@ -142,35 +142,33 @@ function bowl_create_menu_fields_group ( string $id, string $title = "menu") {
 	return $group;
 }
 
+/**
+ * Will get title for link to internal pages / post.
+ * Will detect external links.
+ * @param string $key
+ * @return Closure
+ */
 function bowl_create_menu_filter ( string $key ) {
 	return function ( $data ) use ( $key ) {
 		if ( !isset($data[$key]) || !is_array($data[$key]) )
 			return $data;
 		//			throw new Exception("bowl_create_menu_filter // Cannot find $key in data.");
-		$menu = $data[$key];
-		$newArray = [];
+		$menu = &$data[$key];
 		// FIXME : Title not always working ? Href also ?
-		foreach ( $menu as $item ) {
+		foreach ( $menu as $itemKey => $itemValue ) {
 			// Link will be null if page does not exist in current locale
-			if ( !$item['link'] ) continue;
-			// Get overridden title
-			$title = $item['title'];
-			// No title, get from post
-			if ( empty($title) ) {
-				// Get post from link
-				$post = BowlRequest::getWPPostByPath(
-					remove_locale_from_href( $item['link'] )
-				);
-				// Override title
-				if ( !is_null($post) )
-					$title = $post->post_title;
-			}
-			$newArray[] = [
-				'href' => $item['link'],
-				'title' => $title,
-			];
+			if ( !isset($itemValue['link']) ) continue;
+			$link = $itemValue['link'];
+			// Get post from link
+			$post = BowlRequest::getWPPostByPath(
+				remove_locale_from_href( $link )
+			);
+			// Save short link
+			$menu[ $itemKey ]["link"] = bowl_remove_base_from_href( $link );
+			// No title override, get from post
+			if ( empty($itemValue['title']) && !is_null($post) )
+				$menu[ $itemKey ]["title"] = $post->post_title;
 		}
-		$data[$key] = $newArray;
 		return $data;
 	};
 }

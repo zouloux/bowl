@@ -50,13 +50,15 @@ class BowlRequest
 		return BowlFilters::filterPost( $post, $fetchFields, $autoFetchPostsWithTemplate );
 	}
 
-	static function getAllBowlPosts ( array|bool $postTypes = true, bool $fetchFields = false, array|bool $autoFetchPostsWithTemplate = [] ) {
+	static function getAllBowlPosts ( array $postTypes = ["page", "posts"], bool $fetchFields = false, array|bool $autoFetchPostsWithTemplate = [] ) {
 		// TODO : Retrieve all custom post types that are not hidden
 		// $postTypes == true -> all post types
 		// Get a list of all published pages from WordPress.
-		$pages = get_pages( 'post_status=publish' );
+		$posts = [];
+		foreach ( $postTypes as $postType )
+			$posts = array_merge($posts, get_posts([ "numberposts" => -1, "post_type" => $postType ]) );
 		$bowlPosts = [];
-		foreach ( $pages as $page )
+		foreach ( $posts as $page )
 			$bowlPosts[] = BowlFilters::filterPost( $page, $fetchFields, $autoFetchPostsWithTemplate );
 		return $bowlPosts;
 	}
