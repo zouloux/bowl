@@ -43,6 +43,18 @@ function bowl_create_enabled_conditional_fields ( $label = "Enabled", $default =
 	];
 }
 
+function bowl_create_locale_enable_field ( $disabled = "Disabled", $enabled = "Enabled" ) {
+	$locales = bowl_get_locale_list();
+	$choices = [
+		$disabled,
+		...array_keys($locales),
+		$enabled,
+	];
+	return ButtonGroup::make("", "enabled")
+		->choices( $choices )->defaultValue( count($choices) - 1 )
+		->wrapper(["class" => "bowlEnabledField"]);
+}
+
 
 // ----------------------------------------------------------------------------- ENABLED FLEXIBLE
 // An enabled field which is on top of the flexible block

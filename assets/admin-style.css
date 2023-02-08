@@ -502,10 +502,10 @@ body.wp-admin #wpcontent {
 .acf-field.bowlEnabledField .acf-button-group > label {
   padding: 1px 6px;
 }
-.acf-field.bowlEnabledField .acf-button-group .selected:nth-child(1) {
+.acf-field.bowlEnabledField .acf-button-group .selected:first-child {
   background: rgba(190, 20, 0)
 }
-.acf-field.bowlEnabledField .acf-button-group .selected:nth-child(2) {
+.acf-field.bowlEnabledField .acf-button-group .selected:last-child {
   background: rgba(0, 200, 0)
 }
 
