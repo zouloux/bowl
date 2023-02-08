@@ -52,6 +52,7 @@ function bowl_create_locale_enable_field ( $disabled = "Disabled", $enabled = "E
 	];
 	return ButtonGroup::make("", "enabled")
 		->choices( $choices )->defaultValue( count($choices) - 1 )
+		->returnFormat('array')
 		->wrapper(["class" => "bowlEnabledField"]);
 }
 

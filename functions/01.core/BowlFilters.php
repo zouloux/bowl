@@ -49,15 +49,30 @@ class BowlFilters
 		foreach ( $data as $key => &$node ) {
 			// Remove all data for a node when field enabled=false
 			if ( is_array($node) && isset($node['enabled']) ) {
-				if ( !$node['enabled'] ) {
+				// Locale selector is an array
+				$disable = false;
+				if ( is_array($node['enabled']) ) {
+					$index = intval( $node['enabled']["value"] ) - 1;
+					$locales = array_keys( bowl_get_locale_list() );
+					$currentLocale = bowl_get_current_locale();
+					// Disabled
+					if ( $index === -1 )
+						$disable = true;
+					// Selected locale is not the same as current locale
+					else if ( isset($locales[$index]) && $locales[$index] !== $currentLocale )
+						$disable = true;
+				}
+				// Otherwise just cast and check ( should be "0" or "1" )
+				else {
+					$disable = !$node['enabled'];
+				}
+				// Remove from array and do not continue parsing of this element
+				if ( $disable ) {
 					unset( $data[ $key ] );
 					continue;
 				}
-				else {
-					unset( $node['enabled'] );
-				}
-				//				$data[ $key ] = [ 'enabled' => false ];
-				//				continue;
+				// Not disabled, just remove the enabled value
+				unset( $node['enabled'] );
 			}
 			// Convert flexible layouts to "type"
 			if ( $key === 'acf_fc_layout' ) {
