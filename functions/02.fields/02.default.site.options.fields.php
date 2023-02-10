@@ -152,8 +152,7 @@ function bowl_create_menu_filter ( string $key ) {
 	return function ( $data ) use ( $key ) {
 		if ( !isset($data[$key]) || !is_array($data[$key]) )
 			return $data;
-		$menu = &$data[$key];
-		foreach ( $menu as $itemValue ) {
+		foreach ( $data[$key] as &$itemValue ) {
 			// Link will be null if page does not exist in current locale
 			if ( !isset($itemValue['link']) ) continue;
 			$link = $itemValue['link'];
