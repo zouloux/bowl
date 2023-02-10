@@ -152,10 +152,8 @@ function bowl_create_menu_filter ( string $key ) {
 	return function ( $data ) use ( $key ) {
 		if ( !isset($data[$key]) || !is_array($data[$key]) )
 			return $data;
-		//			throw new Exception("bowl_create_menu_filter // Cannot find $key in data.");
 		$menu = &$data[$key];
-		// FIXME : Title not always working ? Href also ?
-		foreach ( $menu as $itemKey => $itemValue ) {
+		foreach ( $menu as $itemValue ) {
 			// Link will be null if page does not exist in current locale
 			if ( !isset($itemValue['link']) ) continue;
 			$link = $itemValue['link'];
@@ -164,10 +162,12 @@ function bowl_create_menu_filter ( string $key ) {
 				remove_locale_from_href( $link )
 			);
 			// Save short link
-			$menu[ $itemKey ]["link"] = bowl_remove_base_from_href( $link );
+			$itemValue["link"] = bowl_remove_base_from_href( $link );
 			// No title override, get from post
 			if ( empty($itemValue['title']) && !is_null($post) )
-				$menu[ $itemKey ]["title"] = $post->post_title;
+				$itemValue["title"] = $post->post_title;
+			// Patch title
+			$itemValue["title"] = bowl_fix_translated_string( $itemValue["title"] );
 		}
 		return $data;
 	};
