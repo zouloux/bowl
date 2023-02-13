@@ -158,7 +158,7 @@ function bowl_create_menu_filter ( string $key ) {
 			$link = $itemValue['link'];
 			// Get post from link
 			$post = BowlRequest::getWPPostByPath(
-				remove_locale_from_href( $link )
+				$link === "/" ? get_home_url() : $link
 			);
 			// Save short link
 			$itemValue["link"] = bowl_remove_base_from_href( $link );
