@@ -1,8 +1,5 @@
 <?php
 
-
-// ----------------------------------------------------------------------------- GET WP BASE
-
 function bowl_get_base ():string {
 	return rtrim(env('WP_URL'), '/') . '/';
 }
@@ -20,12 +17,13 @@ function bowl_remove_scheme_from_href ( $href ) {
 	);
 }
 
-function bowl_remove_base_from_href ( $href ) {
-	$href = bowl_remove_scheme_from_href( $href );
+function bowl_remove_base_from_href ( $baseHref ) {
+	$href = bowl_remove_scheme_from_href( $baseHref );
 	$base = bowl_remove_scheme_from_href( bowl_get_base() );
 	if ( stripos($href, $base) !== false )
-		$href = substr($href, stripos($href, '/', strlen($base)));
-	return $href;
+		return substr($href, stripos($href, '/', strlen($base)));
+	else
+		return $baseHref;
 }
 
 function bowl_keep_host_from_href ( $href ) {
