@@ -85,35 +85,27 @@ class BowlFilters
 			if ( is_array($node) ) {
 				// Get all keys of this node
 				$nk = array_keys($node);
-				$extractedKeyName = null;
-				$extractedValue = null;
 				// Browse keys
 				foreach ( $nk as $k ) {
-					// Check if a key starts with $_
-					// The first is always the selector ( ButtonGroup )
-					// This is why the $extractedKeyName var is reset out of this scope
+					// Check if it looks like a conditional group key
 					if ( !str_starts_with($k, "\$_") ) continue;
-					if ( is_null($extractedKeyName) ) {
-						// Get key and value for this group
-						$parts = explode("_", $k, 3);
-						if ( count($parts) != 3 ) continue;
-						$extractedKeyName = $parts[1];
-						$extractedValue = $node[ $k ];
-					}
-					else {
-						// Create new node with correct key and selected value
-						if ( !isset($node[ $extractedKeyName ]) )
-							$node[ $extractedKeyName ] = [
-								"selected" => $extractedValue
-							];
-						// Compute searched selected key
-						$searchedSelectedKey = "\$_".$extractedKeyName.'_group_'.$extractedValue;
-						// We are on the selected group, inject data into the new node
-						if ( $k === $searchedSelectedKey )
-							$node[ $extractedKeyName ] += $node[ $k ];
-					}
-					// Unset all ( the selected one and not selected groups )
+					$parts = explode("_", $k, 4);
+					if ( count($parts) != 4 ) continue;
+					// This is a conditional group key
+					// Extract name, value
+					$extractedKeyName = $parts[1];
+					$lastPart = $parts[3];
+					$extractedValue = $node[ $k ];
+					// Always unset original variables because we'll recreate a clean array
 					unset( $node[$k] );
+					// If we are on the selected node
+					if ( $lastPart !== "selected" ) continue;
+					// Inject value of selected node
+					$searchedSelectedKey = "\$_".$extractedKeyName.'_group_'.$extractedValue;
+					$node[ $extractedKeyName ] = array_merge(
+						[ "selected" => $extractedValue ],
+						$node[ $searchedSelectedKey ] ?? []
+					);
 				}
 			}
 			// Filter WP_Post to BowlPost and auto fetch fields and sub posts

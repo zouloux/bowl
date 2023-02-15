@@ -1,237 +1,649 @@
 <?php
 
-class BowlFilters
-{
-	// ------------------------------------------------------------------------- PATCHES
+use Extended\ACF\Fields\Group;
+use Extended\ACF\Key;
+use Extended\ACF\Location;
 
-	/**
-	 * Patch all "${screenName}___${fieldName}" to "$fieldName"
-	 */
-	protected static function patchScreenNameFields ( &$data ) {
-		foreach ( $data as $key => $value ) {
-			$split = explode("___", $key, 2);
-			if ( count($split) != 2 ) continue;
-			$data[ $split[1] ] = $value;
-			unset( $data[$key] );
-		}
-		return $data;
+/**
+ * TODO : Important
+ * - Track list of all custom post types and templates + a getter
+ * 		- Use it in BowlSitemap etc
+ *
+ * TODO : Less important
+ * - check hidden and do it better (hide in admin vs hide in urls) 'show_in_rest'
+ * - 'has_archive' ?
+ * - sitemap filtering
+ *
+ * If possible :
+ * - Remove editor for specific page ids / templates, not all pages
+ *
+ * TODO : Test createDefaultPageFields
+ * TODO : Test createDefaultPostFields
+ * TODO : Do not allow multiple instances of them
+ *
+ * TODO : DOC DOC DOC
+ */
+class BowlFields {
+
+	// ------------------------------------------------------------------------- REGISTERING
+
+	static protected array $__registeredFields = [];
+	static function register ( callable|BowlFields $handler ) {
+		self::$__registeredFields[] = $handler;
 	}
 
-	/**
-	 * Will patch fields recursively :
-	 * - Translated keys (fr_keyName to keyName)
-	 * - Clear nodes with enabled=false
-	 * - Convert media to BowlAttachment objects
-	 * - Convert WP_Post to BowlPost, and will fetch fields recursively
-	 * - Key of flexibles "acf_fc_layout" to "type"
-	 * @param array $data
-	 * @param array|bool $autoFetchPostsWithTemplate
-	 * @return array
-	 */
-	static function recursivePatchFields ( array &$data, array|bool $autoFetchPostsWithTemplate = [] ):array {
-		$locale = bowl_get_current_locale();
-		// Filter translated keys
-		// Out of main loop because altering $data (otherwise node can be duplicated)
-		foreach ( $data as $key => &$node ) {
-			if ( stripos($key, $locale.'_') === 0 ) {
-				$oldKey = $key;
-				// Convert it without locale prefix
-				$newKey = substr($key, strlen($locale) + 1);
-				// If a field with this key already exists, keep the _
-				if ( isset($data[$newKey]) )
-					$newKey = substr($key, strlen($locale));
-				// Replace value
-				$data[$newKey] = $node;
-				unset( $data[$oldKey] );
+	// ------------------------------------------------------------------------- INSTALLING
+
+	protected static array $__postTypes = [];
+
+	protected static array $__allFieldGroupOrders = [];
+
+	protected static array $__installedFields = [];
+
+	static function install () {
+		$separatorPosition = 0;
+		foreach ( self::$__registeredFields as $handler ) {
+			$fields = is_callable($handler) ? $handler() : $handler;
+			$separatorPosition = max($fields->_position, $separatorPosition);
+			self::installFields( $fields );
+			self::$__installedFields[] = $fields;
+		}
+		self::reorderMenu( $separatorPosition );
+		self::afterFunctions();
+	}
+
+	protected static function installFields ( BowlFields $fields ) {
+		$location = [];
+		// Check if installed field is multi lang. First, only if site is multi lang
+		$isMultiLang = false;
+		if (count(bowl_get_locale_list()) >= 2) {
+			// Then, check if installed fields are multi lang
+			$isMultiLang = $fields->_multiLang;
+			/** @var BowlGroupFields $group */
+			foreach ( $fields->_groups as $group ) {
+				// Then, check each group, if at least one is multi lang
+				// the whole installed field becomes multi lang
+				$isGroupMultiLang = $group->toArray()['multiLang'];
+				if ( $isGroupMultiLang )
+					$isMultiLang = true;
 			}
 		}
-		// Browse node properties
-		foreach ( $data as $key => &$node ) {
-			// Remove all data for a node when field enabled=false
-			if ( is_array($node) && isset($node['enabled']) ) {
-				// Locale selector is an array
-				$disable = false;
-				if ( is_array($node['enabled']) ) {
-					$index = intval( $node['enabled']["value"] ) - 1;
-					$locales = array_keys( bowl_get_locale_list() );
-					$currentLocale = bowl_get_current_locale();
-					// Disabled
-					if ( $index === -1 )
-						$disable = true;
-					// Selected locale is not the same as current locale
-					else if ( isset($locales[$index]) && $locales[$index] !== $currentLocale )
-						$disable = true;
+		/**
+		 * SINGLETON
+		 */
+		if ( $fields->type == "singleton" ) {
+			if ( !empty($fields->_label) ) {
+				// Set location, id and order
+				$location[] = Location::where( 'options_page', $fields->name );
+				$fields->_id = 'toplevel_page_'.$fields->name;
+				// Register options page with ACF
+				acf_add_options_page(array_merge([
+					'menu_slug' => $fields->name,
+					'page_title' => $fields->_label[0],
+					'icon_url' => $fields->_icon,
+					'position' => $fields->_position,
+				], $fields->_options));
+				// Register this options page type as multi-lang
+				if ( $isMultiLang )
+					add_filter('wpm_admin_pages', function ( $config ) use ( $fields ) {
+						$config[] = $fields->_id;
+						return $config;
+					});
+			}
+		}
+		/**
+		 * COLLECTION
+		 */
+		else if ( $fields->type == "collection" ) {
+			// Set location, id and order
+			$location[] = Location::where( 'post_type', $fields->name );
+			$fields->_id = $fields->name;
+			$orderHookName = $fields->name;
+			// Do not re-declare post as a post type
+			if ( $fields->name != 'post' && $fields->name != 'page' ) {
+				// Register this post type
+				self::$__postTypes[] = $fields->_id;
+				// Compute ACF options
+				$options = array_merge([
+					'label' => $fields->_label[1] ?? $fields->_label[0],
+					'public' => !$fields->_hidden,
+					'show_ui' => !$fields->_hidden,
+					'show_in_rest' => !$fields->_hidden,
+					'has_archive' => false,
+					'supports' => ['title'],
+					'menu_position' => $fields->_position,
+					'menu_icon' => $fields->_icon,
+				], $fields->_options);
+				// Register this post type at WP init
+				add_action( 'init', function () use ($fields, $options) {
+					register_post_type( $fields->name, $options );
+				});
+				// Register this custom post type as multi lang
+				if ( $isMultiLang )
+					add_filter( 'wpm_post_'.$fields->_id.'_config', function () { return []; });
+				// Disable sitemap on this post type
+				// TODO
+				//				if ( isset($fields->sitemap) && $fields->sitemap === false ) {
+				//					global $_bowlSitemapRemovedPostTypes;
+				//					if (is_null($_bowlSitemapRemovedPostTypes))
+				//						$_bowlSitemapRemovedPostTypes = [];
+				//					$_bowlSitemapRemovedPostTypes[] = $fields->name;
+				//				}
+			}
+			// All pages
+			else if ( $fields->name == 'page' ) {
+				// Do not execute on custom page IDs
+				foreach ( $fields->_excludedPageIDs as $pageID )
+					$location[0]->and( 'page', '!=', $pageID );
+				// FIXME : Faire en sorte que le bowl_remove_editor_for_post prenne en compte le "not"
+				// FIXME : Car là ça vire pour toutes les pages
+				// Remove Wysiwyg editor
+				!$fields->_editor && bowl_remove_field_for_post( 'page', 'editor' );
+				!$fields->_excerpt && bowl_remove_field_for_post( 'page', 'excerpt');
+			}
+			// All posts
+			else {
+				// Remove Wysiwyg editor
+				!$fields->_editor && bowl_remove_field_for_post( 'post', 'editor' );
+				!$fields->_excerpt && bowl_remove_field_for_post( 'post', 'excerpt');
+			}
+		}
+		/**
+		 * PAGE
+		 */
+		else if ( $fields->type == "page" ) {
+			$orderHookName = 'page';
+			$fields->_id = $fields->name;
+			// This page is associated with IDs
+			if ( !empty($fields->_pageIDs) ) {
+				// Restrict deletion
+				$restrict_post_deletion = function ( $postID ) use ( $fields ) {
+					if ( in_array($postID, $fields->_pageIDs) )
+						bowl_show_admin_error_message( __("This page cannot be deleted.") );
+				};
+				add_action('wp_trash_post', $restrict_post_deletion, 10, 1);
+				add_action('delete_post', $restrict_post_deletion, 10, 1);
+				foreach ( $fields->_pageIDs as $pageID ) {
+					// Register location
+					$location[] = Location::where( 'page', $pageID );
+					// Remove Wysiwyg editor
+					!$fields->_editor && bowl_remove_field_for_post( 'page', 'editor', $pageID );
+					!$fields->_excerpt && bowl_remove_field_for_post( 'page', 'excerpt', $pageID );
 				}
-				// Otherwise just cast and check ( should be "0" or "1" )
-				else {
-					$disable = !$node['enabled'];
-				}
-				// Remove from array and do not continue parsing of this element
-				if ( $disable ) {
-					unset( $data[ $key ] );
+			}
+		}
+		/**
+		 * CUSTOM TEMPLATE
+		 */
+		if (
+			!empty($fields->_template)
+			&& (
+				$fields->type == "collection"
+				|| $fields->type == "page"
+			)
+		) {
+			// We need to scope those field into template to avoid collisions of field names
+			// between same post type with different templates (if both have flexible for ex)
+			$fields->_id = $fields->_id."--".acf_slugify($fields->_template);
+			//			dump("");
+			//			dump($fields->_id);
+			// Register new template for this post type
+			$type = $fields->type == "page" ? "page" : $fields->name;
+			$type = "page";
+			add_filter( 'theme_'.$type.'_templates', function ($templates) use ($fields) {
+				$templates[ $fields->_id ] = $fields->_template;
+				return $templates;
+			});
+			// Register location
+			//			$location[0]->and('post_template', $fields->_id);
+			$location[0] = Location::where('post_template', "==", $fields->_id);
+		}
+		/**
+		 * REGISTER GROUPS
+		 */
+		// Set location
+		$fields->location = $location;
+		// Patch admin custom screen
+		bowl_patch_admin_custom_screen( $fields );
+		// Ordered IDs of field groups
+		$fieldGroupsIDOrders = [];
+		// Process all groups for this screen
+		$position = 0;
+		foreach ( $fields->_groups as $key => $groupObject ) {
+			$group = $groupObject->toArray();
+			// Set a key from screen and group name to avoid collisions across screens
+			// Separator with ___ here is important because it will be used to strip
+			// back to just "$key" @see BowlFilters::patchScreenNameFields
+			$key = acf_slugify($fields->_id ?? $fields->name).'___'.$key;
+			$rawFields = isset( $group['rawFields'] ) && $group['rawFields'];
+			// Create FieldGroup
+			$fieldGroup = array_merge([
+				'title' => $group['title'],
+				'key' => Key::generate(Key::sanitize($key), 'group'),
+				// Define menu order from declaration order
+				'menu_order' => ++$position,
+				'style' => (isset($group["seamless"]) && $group["seamless"]) ? "seamless" : "default",
+				// Convert locations to array
+				'location' => array_map( fn ($location) => $location->get(), $fields->location ),
+				'fields' => (
+					// If rawFields is enabled, directly show fields without parent group
+					$rawFields ? array_map( fn ($field) => $field->get(), $group['fields'] )
+					// By default, show fields inside a nameless group
+					: [
+						// We use the unique key here to avoid collisions
+						Group::make(' ', $key )
+							->layout('row')
+							->instructions( $group['instructions'] ?? '' )
+							->fields( $group['fields'] )
+							->get()
+					]
+				),
+			], $group['options']);
+			// Store key to order it later
+			$fieldGroupsIDOrders[] = 'acf-'.$fieldGroup['key'];
+			//			dump($fieldGroup);
+			// Register this field group
+			register_field_group( $fieldGroup );
+		}
+		// If we have info on field group orders
+		if ( isset($orderHookName) ) {
+			if ( !isset(self::$__allFieldGroupOrders[$orderHookName]) )
+				self::$__allFieldGroupOrders[ $orderHookName ] = [];
+			// Add them by custom post type
+			// We do this because for the custom post type "page", we have only 1 hook
+			// So we will just concat all field orders for every pages into the CPT "pages"
+			// It works because WP admin will use only fields in current page
+			self::$__allFieldGroupOrders[ $orderHookName ][] = $fieldGroupsIDOrders;
+		}
+	}
+
+	// ------------------------------------------------------------------------- AFTER INSTALL
+
+	/**
+	 * Re-order custom items in menu.
+	 * In order :
+	 * - Singletons
+	 * - -----
+	 * - Posts
+	 * - Pages
+	 * - Collections
+	 * - -----
+	 * - ... Other options ...
+	 */
+	protected static function reorderMenu ( $separatorPosition ) {
+		add_action( 'admin_init', function () use ($separatorPosition) {
+			global $menu;
+			// Sometime menu is not init at this time
+			if (!$menu) return;
+			// Remove dashboard item
+			foreach ( $menu as $index => $section ) {
+				if ($section[2] == "index.php" && $section[5] == "menu-dashboard")
+					unset($menu[$index]);
+			}
+			$orderedMenu = [];
+			// Get page section to move it after posts
+			$pageSection = null;
+			foreach ( $menu as $section ) {
+				if ( $section[1] != "edit_pages" ) continue;
+				$pageSection = $section;
+			}
+			// Browse and re-order menu
+			$separatorIndex = 0;
+			foreach ( $menu as $section ) {
+				if ( $section[2] == "separator1" || $section[1] == "edit_pages" )
 					continue;
+				$isPost = $section[1] == "edit_posts" && $section[2] == "edit.php";
+				if ( $isPost || $section[1] == "upload_files" && $section[2] == "upload.php" ) {
+					$separatorIndex ++;
+					$orderedMenu[] = ['','read',"separator$separatorIndex",'','wp-menu-separator'];
 				}
-				// Not disabled, just remove the enabled value
-				unset( $node['enabled'] );
+				$orderedMenu[] = $section;
+				if ( $isPost )
+					$orderedMenu[] = $pageSection;
 			}
-			// Convert flexible layouts to "type"
-			if ( $key === 'acf_fc_layout' ) {
-				$data += ['type' => $data[$key]];
-				unset( $data[$key] );
+			//			foreach ( $newMenu as $index => $section ) dump($section);
+			// Override ordered global menu
+			$menu = $orderedMenu;
+		});
+	}
+
+	/**
+	 * After function hook is listened to order field groups vertically.
+	 */
+	protected static function afterFunctions () {
+		// We inject field group orders after all fields are declared
+		$allFieldGroupOrders = self::$__allFieldGroupOrders;
+		add_action('after_functions', function () use ( $allFieldGroupOrders ) {
+			foreach ( $allFieldGroupOrders as $orderHookName => $fieldGroupOrders ) {
+				// Concat all field groups orders for this custom post type
+				$allFieldGroupOrdersForHook = [];
+				foreach ( $fieldGroupOrders as $currentFieldGroupOrder )
+					$allFieldGroupOrdersForHook = array_merge($allFieldGroupOrdersForHook, $currentFieldGroupOrder);
+				// Hook meta box order for this custom post type
+				$hookName = 'get_user_option_meta-box-order_'.$orderHookName;
+				add_filter($hookName , function () use ($allFieldGroupOrdersForHook) {
+					return [
+						// Force order with Yoast on top
+						'normal' => join(',', array_merge(
+							[ 'wpseo_meta' ],
+							$allFieldGroupOrdersForHook
+						))
+					];
+				});
 			}
-			// Filter conditional groups generated with ...bowl_create_conditional_group()
-			// Convert field groups like _webAppCapabilities_group_selected = 'ok'
-			// To something clean : webAppCapabilities => ["selected" => true, ...]
-			if ( is_array($node) ) {
-				// Get all keys of this node
-				$nk = array_keys($node);
-				// Browse keys
-				foreach ( $nk as $k ) {
-					// Check if it looks like a conditional group key
-					if ( !str_starts_with($k, "\$_") ) continue;
-					$parts = explode("_", $k, 4);
-					if ( count($parts) != 4 ) continue;
-					// This is a conditional group key
-					// Extract name, value
-					$extractedKeyName = $parts[1];
-					$lastPart = $parts[3];
-					$extractedValue = $node[ $k ];
-					// Always unset original variables because we'll recreate a clean array
-					unset( $node[$k] );
-					// If we are on the selected node
-					if ( $lastPart !== "selected" ) continue;
-					// Inject value of selected node
-					$searchedSelectedKey = "\$_".$extractedKeyName.'_group_'.$extractedValue;
-					$node[ $extractedKeyName ] = array_merge(
-						[ "selected" => $extractedValue ],
-						$node[ $searchedSelectedKey ] ?? []
-					);
+		});
+	}
+
+	// ------------------------------------------------------------------------- GATHERING INSTALLED FIELDS
+
+	static function getMatchingInstalledFieldsForPost ( WP_Post $post ) {
+		$matchingFields = [];
+		foreach ( self::$__installedFields as $installedField ) {
+			// Browse locations to check if this post match
+			/** @var Location $locations */
+			foreach ( $installedField->location as $locations ) {
+				// Only check first location (check "or" but do not check "and")
+				$location = $locations->get()[0];
+				//dump($location);
+				$isMatching = false;
+				// Page filtering
+				// TODO : Exclude ids of Location->and( $excluded ) in BowlFields
+				if ( $post->post_type == "page" ) {
+					// Filter page of a specific ID
+					if ( $location['param'] == "page" ) {
+						if ( $location['value'] == $post->ID )
+							$isMatching = true;
+					}
+					// Filter a page with a specific template
+					if ( $location['param'] == 'post_template' ) {
+						$templateName = get_page_template_slug( $post->ID );
+						if ( !empty($templateName) && $location['value'] == $templateName )
+							$isMatching = true;
+					}
+				}
+				// Regular post filtering
+				else if ( $post->post_type == "post" ) {
+					// TODO : All posts matching
+					if ( $location['param'] == 'post_template' ) {
+						$templateName = get_page_template_slug( $post->ID );
+						if ( !empty($templateName) && $location['value'] == $templateName )
+							$isMatching = true;
+					}
+				}
+				// Custom post type filtering
+				else if ( $location['param'] == "post_type" ) {
+					if ( $location['value'] == $post->post_type )
+						$isMatching = true;
+				}
+				// Register this field as matching
+				if ( $isMatching )
+					$matchingFields[] = $installedField;
+			}
+		}
+		return $matchingFields;
+	}
+
+	static function getInstalledSingletonsByName () {
+		$fields = [];
+		foreach ( self::$__installedFields as $installedField ) {
+			// Browse locations to check if this post match
+			/** @var Location $locations */
+			foreach ( $installedField->location as $locations ) {
+				$location = $locations->get();
+				if ( !isset($location[0]) ) continue;
+				if (
+					$location[0]['param'] == "options_page"
+					&& $location[0]['operator'] == "=="
+				) {
+					// FIXME : Why was that in an array ?
+					//					if ( !isset($fields[$location[0]['value']]) )
+					//						$fields[$location[0]['value']] = [];
+					//					$fields[$location[0]['value']][] = $installedField;
+					$fields[$location[0]['value']] = $installedField;
 				}
 			}
-			// Filter WP_Post to BowlPost and auto fetch fields and sub posts
-			if ( $node instanceof WP_Post ) {
-				// If we need to fetch fields for this post
-				$fetchFields = (
-				is_bool($autoFetchPostsWithTemplate) ? $autoFetchPostsWithTemplate
-					: in_array(BowlPost::getTemplateNameFromWPPost( $node ), $autoFetchPostsWithTemplate)
-				);
-				// Recursively convert to BowlPost
-				$data[ $key ] = BowlFilters::filterPost( $node, $fetchFields, $autoFetchPostsWithTemplate );
-				continue;
-			}
-			// Filter media
-			if (
-				is_array($node)
-				&& isset($node['type'])
-				&& isset($node['subtype'])
-				&& isset($node['mime_type'])
-			) {
-				$data[$key] = self::filterAttachment( $node );
-				continue;
-			}
-			// Recursive patch filter
-			if ( is_array($node) )
-				$data[ $key ] = BowlFilters::recursivePatchFields( $node, $autoFetchPostsWithTemplate );
 		}
-		return $data;
+		return $fields;
 	}
 
-	// ------------------------------------------------------------------------- BOWL POST FILTER
+	static function getAllInstalledFields ():array { return self::$__installedFields; }
 
-	protected static array $__bowlPostFilters = [];
-	static function registerBowlPostsFieldsFilter ( callable $handler, $afterFieldFiltering = true ) {
-		self::$__bowlPostFilters[] = [$afterFieldFiltering, $handler];
+	static function getFieldsFilterHandlers ( BowlFields $fields ):array {
+		return $fields->_filterHandlers;
 	}
-
-	/**
-	 * Filter a WP_Post and convert it to a BowlPost.
-	 * Will fetch / parse / clean all associated fields.
-	 * @param WP_Post|null $post
-	 * @param bool $fetchFields
-	 * @param array|bool $autoFetchPostsWithTemplate
-	 * @return BowlPost|null
-	 */
-	static function filterPost ( WP_Post|null $post, bool $fetchFields = true, array|bool $autoFetchPostsWithTemplate = []):?BowlPost {
-		if ( is_null($post) )
-			return null;
-		// Do not fetch fields
-		if ( !$fetchFields )
-			return new BowlPost( $post );
-		// Get raw fields associated to this post
-		$fields = get_fields( $post->ID );
-		if ( $fields === false ) $fields = [];
-		// Patch screen names to remove uniqueness part
-		self::patchScreenNameFields( $fields );
-		// Filter with global before filter
-		foreach ( self::$__bowlPostFilters as $filter )
-			if ( !$filter[0] )
-				$fields = $filter[1]( $fields, $post );
-		// Recursive patch fields after pre-filter be before fields filter
-		$fields = self::recursivePatchFields( $fields, $autoFetchPostsWithTemplate );
-		// Get matching installed fields and browse them
-		$matchingFields = BowlFields::getMatchingInstalledFieldsForPost( $post );
-		/** @var BowlFields $field */
-		foreach ( $matchingFields as $field ) {
-			// Get field filter and filter raw fields through them
-			$handlers = BowlFields::getFieldsFilterHandlers( $field );
-			foreach ( $handlers as $handler)
-				$fields = $handler( $fields, $post );
-		}
-		// Filter with global after filter
-		foreach ( self::$__bowlPostFilters as $filter )
-			if ( $filter[0] )
-				$fields = $filter[1]( $fields, $post );
-		// Create a new bowl post from original WP_Post and parsed fields
-		return new BowlPost( $post, $fields, true, true );
-	}
-
-	// ------------------------------------------------------------------------- FILTER SINGLETON
-
-	/**
-	 * Filter a Singleton Field and its data.
-	 * Should not be used directly.
-	 * Data will be recursively patched and filtered by BowlFields filters.
-	 * @see BowlRequest::getSingleton()
-	 * @param BowlFields $singletonFields BowlFields to filter (holds filter handlers)
-	 * @param array $singletonData Singleton data, gathered with get_field.
-	 * @param array|bool $autoFetchPostsWithTemplate
-	 * @return array
-	 */
-	static function filterSingletonData ( BowlFields $singletonFields, array $singletonData, array|bool $autoFetchPostsWithTemplate = [] ) {
-		// Recursive patch fields after pre-filter be before fields filter
-		$singletonData = self::recursivePatchFields( $singletonData, $autoFetchPostsWithTemplate );
-		// Get filters and apply them
-		$filters = BowlFields::getFieldsFilterHandlers( $singletonFields );
-		foreach ( $filters as $filter )
-			$singletonData = $filter( $singletonData );
-		return $singletonData;
-	}
-
-	// ------------------------------------------------------------------------- OTHER FILTERS
-
-	/**
-	 * Filter rich content and
-	 * @param string $content
-	 * @return string
-	 */
-	static function filterRichContent ( string $content ):string {
-		// Remove HTML comments
-		$content = preg_replace("/<!--(.*)-->/Uis", "", $content);
-		// Remove multiple line jumps
-		return preg_replace("/[\r\n]+/", "\n", $content);
+	static function getFieldsGroups (BowlFields $fields):array {
+		return $fields->_groups;
 	}
 
 	/**
-	 * Convert WP Attachment to a BowlAttachment
-	 * @param array $node
-	 * @return BowlAttachment
+	 * Get nice template name (not slugified one)
 	 */
-	static function filterAttachment ( array $node ):BowlAttachment {
-		if ( $node["type"] === "image" )
-			return new BowlImage( $node );
-		else if ( $node["type"] === "video")
-			return new BowlVideo( $node );
-		else
-			return new BowlAttachment( $node );
+	static function getFieldsTemplateName (BowlFields $fields):string {
+		return $fields->_template;
+	}
+
+	// ------------------------------------------------------------------------- FACTORY
+
+	/**
+	 * Create a Singleton fields configuration, which will appear on top of admin bar.
+	 * Singleton are straight config page without collection of object.
+	 * @param string $name
+	 * @return BowlFields
+	 * @throws Exception
+	 */
+	static function createSingletonFields ( string $name ) {
+		return new BowlFields("singleton", $name);
+	}
+
+	/**
+	 * Create a Collection fields configuration, which will appear bellow Singletons in admin bar.
+	 * Collections are equivalent to custom post types.
+	 * @param string $name
+	 * @return BowlFields
+	 * @throws Exception
+	 */
+	static function createCollectionFields ( string $name ) {
+		return new BowlFields("collection", $name );
+	}
+
+	/**
+	 * Create a new Page fields configuration. It will be usable from "Pages" in admin bar.
+	 * Page fields can be limited to a specific page template name,
+	 * or a specific set of page IDs. If limited to page IDs, it will prevent deletion.
+	 * @param string $name
+	 * @param string|array $templateOrPageIDs Template name to create as string,
+	 * 										  or list of page IDs to associate with.
+	 * @return BowlFields
+	 * @throws Exception
+	 */
+	static function createPageFields ( string $name, string|array $templateOrPageIDs ) {
+		$fields = new BowlFields("page", $name);
+		if ( is_array($templateOrPageIDs) )
+			$fields->_pageIDs = $templateOrPageIDs;
+		else if ( is_string($templateOrPageIDs) )
+			$fields->_template = $templateOrPageIDs;
+		return $fields;
+	}
+
+	/**
+	 * Create a default Page fields configuration.
+	 * This will be applied to all Pages without template or not configured with
+	 * a page ID (@see BowlFields::createPageFields).
+	 * Default configuration can be created only once for obvious reasons.
+	 * @param array $excludedPageIDs Exclude those page IDs from this default configuration.
+	 * @return BowlFields
+	 */
+	static function createDefaultPageFields ( array $excludedPageIDs = [] ) {
+		$fields = new BowlFields("collection", "page");
+		$fields->_excludedPageIDs = $excludedPageIDs;
+		return $fields;
+	}
+
+	/**
+	 * Create a default Post fields configuration.
+	 * This will be applied to all Posts.
+	 * @return BowlFields
+	 */
+	static function createDefaultPostFields () {
+		return new BowlFields("collection", "post");
+	}
+
+
+	static function createTemplatePostFields ( string $templateName ) {
+		$fields = new BowlFields("collection", "post");
+		$fields->_template = $templateName;
+		return $fields;
+	}
+
+	// ------------------------------------------------------------------------- INIT
+
+	protected string $_id;
+
+	protected array $_excludedPageIDs = [];
+
+	protected array $_pageIDs = [];
+
+	protected string $_template = "";
+
+	public array $location = [];
+
+	public function __construct ( public string $type, public string $name ) {
+		if ( !in_array($type, ["collection", "singleton", "page"]) )
+			throw new \Exception("Invalid BowlFields type $type.");
+		// Default menu position
+		if ( $type == "singleton" )
+			$this->_position = 1;
+		else if ( $type == "collection" )
+			$this->_position = 6;
+		// Default name
+		//		$this->_label = [$name];
+	}
+
+	// ------------------------------------------------------------------------- MENU
+
+	protected array $_label = [];
+	protected string $_icon = "";
+	protected int $_position = 0;
+
+	/**
+	 * Add this item to the menu bar.
+	 * @param array $label
+	 * @param string|null $icon https://developer.wordpress.org/resource/dashicons/
+	 * @param int|null $position
+	 * @return $this
+	 */
+	public function menu ( array $label, string $icon = null, int $position = null ) {
+		$this->_label = $label;
+		if ( !is_null($icon) )
+			$this->_icon = $icon;
+		if ( !is_null($position) )
+			$this->_position += $position;
+		// FIXME : Not precise enough, should be hidden from admin menu only
+		$this->_hidden = false;
+		return $this;
+	}
+
+	// ------------------------------------------------------------------------- ACF OPTIONS
+
+	protected array $_options = [];
+	public function options ( array $options ) {
+		$this->_options = $options;
+		return $this;
+	}
+
+	// ------------------------------------------------------------------------- MULTILANG
+
+	protected bool $_multiLang = false;
+	public function multiLang ( bool $multiLang = true ) {
+		$this->_multiLang = $multiLang;
+		return $this;
+	}
+
+	// ------------------------------------------------------------------------- HIDDEN
+
+	// FIXME : Hidden for admin menu / Hidden from rest API / Hidden from router
+	protected bool $_hidden = true;
+	public function hidden ( bool $hidden ) {
+		$this->_hidden = $hidden;
+		return $this;
+	}
+
+	// ------------------------------------------------------------------------- EDITOR
+
+	protected bool $_editor = true;
+	public function editor ( bool $editor ) {
+		$this->_editor = $editor;
+		return $this;
+	}
+
+	// ------------------------------------------------------------------------- EXCERPT
+
+	protected bool $_excerpt = true;
+	public function excerpt ( bool $excerpt ) {
+		$this->_excerpt = $excerpt;
+		return $this;
+	}
+
+	// ------------------------------------------------------------------------- GROUPS
+
+	protected array $_groups = [];
+	public function addGroup ( string $key, string $title = null ) {
+		return $this->attachGroup( $key, new BowlGroupFields( $title ?? $key ) );
+	}
+	public function attachGroup ( string $key, BowlGroupFields $group ) {
+		$this->_groups[ $key ] = $group;
+		return $group;
+	}
+
+	// ------------------------------------------------------------------------- FILTERING DATA
+
+	protected array $_filterHandlers = [];
+	public function addFilter ( callable $filterHandler ) {
+		$this->_filterHandlers[] = $filterHandler;
+		return $this;
+	}
+}
+
+// ----------------------------------------------------------------------------- BOWL GROUP FIELD
+
+class BowlGroupFields
+{
+	protected array $_groupData = [
+		'fields' => [],
+		'options' => [],
+		'multiLang' => false,
+	];
+
+	public function toArray () { return $this->_groupData; }
+
+	public function __construct ( string $title ) {
+		$this->_groupData['title'] = $title;
+	}
+
+	// ------------------------------------------------------------------------- CHAINED CONFIGURATORS
+
+	public function rawFields ( bool $value = true ) {
+		$this->_groupData['rawFields'] = $value;
+		return $this;
+	}
+	public function seamless ( bool $value = true ) {
+		$this->_groupData['seamless'] = $value;
+		return $this;
+	}
+	public function fields ( array $fields ) {
+		$this->_groupData['fields'] += $fields;
+		return $this;
+	}
+	public function options ( array $options ) {
+		$this->_groupData['options'] += $options;
+		return $this;
+	}
+	public function multiLang ( bool $multiLang = true ) {
+		$this->_groupData['multiLang'] = $multiLang;
+		return $this;
+	}
+	public function instructions ( string $instructions ) {
+		$this->_groupData['instructions'] = $instructions;
+		return $this;
 	}
 }
