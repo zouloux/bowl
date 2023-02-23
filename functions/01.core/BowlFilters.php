@@ -33,7 +33,13 @@ class BowlFilters
 		// Filter translated keys
 		// Out of main loop because altering $data (otherwise node can be duplicated)
 		foreach ( $data as $key => &$node ) {
-			if ( stripos($key, $locale.'_') === 0 ) {
+			// Convert flexible layouts to "type"
+			if ( $key === 'acf_fc_layout' ) {
+				$data['type'] = $node;
+				unset($data[$key]);
+			}
+			// Check translations keys
+			else if ( stripos($key, $locale.'_') === 0 ) {
 				$oldKey = $key;
 				// Convert it without locale prefix
 				$newKey = substr($key, strlen($locale) + 1);
@@ -74,11 +80,6 @@ class BowlFilters
 				// Not disabled, just remove the enabled value
 				unset( $node['enabled'] );
 			}
-			// Convert flexible layouts to "type"
-			if ( $key === 'acf_fc_layout' ) {
-				$data += ['type' => $data[$key]];
-				unset( $data[$key] );
-			}
 			// Filter conditional groups generated with ...bowl_create_conditional_group()
 			// Convert field groups like _webAppCapabilities_group_selected = 'ok'
 			// To something clean : webAppCapabilities => ["selected" => true, ...]
@@ -112,7 +113,7 @@ class BowlFilters
 			if ( $node instanceof WP_Post ) {
 				// If we need to fetch fields for this post
 				$fetchFields = (
-				is_bool($autoFetchPostsWithTemplate) ? $autoFetchPostsWithTemplate
+					is_bool($autoFetchPostsWithTemplate) ? $autoFetchPostsWithTemplate
 					: in_array(BowlPost::getTemplateNameFromWPPost( $node ), $autoFetchPostsWithTemplate)
 				);
 				// Recursively convert to BowlPost
