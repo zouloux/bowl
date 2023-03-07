@@ -6,59 +6,39 @@ function bowl_inject_twig_helpers ( \Twig\Environment $twig ) {
 		new \Twig\TwigFunction('dictionary', function () {
 		})
 	);
-	// TODO : BowlImage helper, get correct size
+
+	function browseCompatibleFormats ( $formats, $filter = null ) {
+		$supportsWebP = str_contains($_SERVER[ 'HTTP_ACCEPT' ], 'image/webp');
+		$r = [];
+		foreach ( $formats as $format ) {
+			if ( !$supportsWebP && $format['format'] === "webp" ) continue;
+			if ( $supportsWebP && $format['format'] !== "webp" ) continue;
+			$r[] = is_null($filter) ? $format : $filter( $format );
+		}
+		return $r;
+	}
 	$twig->addFilter(
-		// TODO : WebP
-		new \Twig\TwigFilter('image', function ( BowlImage $image, string|int $size = null ) {
-			$matchingFormats = [];
-			/** @var BowlImageFormat $nearestFormat */
-//			$nearestFormat = null;
-			foreach ( $image->formats as $format ) {
-				// Keep image format by its size name
-				if ( is_string($size) && $format->name == $size )
-					$matchingFormats[] = $format;
-				// Keep image format by its width, in px.
-				// Looking for the nearest format bigger than request size.
-//				else if ( is_int($size) && $format->width >= $size ) {
-//					// Already has a nearest
-//					if ( !is_null($nearestFormat) && $size > $nearestFormat->width ) {
-//						continue;
-//					}
-//					$nearest = $size;
-//				}
+		new \Twig\TwigFilter('imageSrcSet', function ( BowlImage|array $image ) {
+			$image = is_array($image) ? $image : $image->toArray();
+			$sizes = browseCompatibleFormats($image['formats'], function ($format) {
+				return bowl_remove_base_from_href( $format['href'] )." ".$format['width']."w";
+			});
+			return implode(",", $sizes);
+		})
+	);
+	$twig->addFilter(
+		new \Twig\TwigFilter('imageSrc', function ( BowlImage|array $image, string|int $size = null ) {
+			$image = is_array($image) ? $image : $image->toArray();
+			$formats = browseCompatibleFormats($image['formats']);
+			$nearestFormat = null;
+			foreach ( $formats as $format ) {
+				if (
+					$nearestFormat === null ||
+					abs( $format['width'] - $size ) < abs( $nearestFormat['width'] - $size )
+				)
+					$nearestFormat = $format;
 			}
-
-			// No format found, find biggest
-			if ( empty($matchingFormats) ) {
-				$biggestFormatsByType = [];
-				foreach ( $image->formats as $format ) {
-					if ( !isset($biggestFormatsByType[$format->format]) )
-						$biggestFormatsByType[$format->format] = $format;
-					if ( $format->width > $biggestFormatsByType[$format->format]->width )
-						$biggestFormatsByType[$format->format] = $format;
-				}
-			}
-
-//			$srcset = wp_get_attachment_image_srcset($image->id);
-//			dump($srcset);
-
-			// Return WebP if client is compatible, otherwise return default format
-			if ( str_contains($_SERVER[ 'HTTP_ACCEPT' ], 'image/webp') )
-				foreach ( $matchingFormats as $format )
-					if ( $format->format == "webp" )
-						return $format;
-			// WebP not supported or not generated
-			if ( isset($matchingFormats[0]) )
-				return $matchingFormats[0];
-
-			// Still nothing found, return original uploaded image to avoid "href" not found
-			return new BowlImageFormat([
-				'width' => $image->width,
-				'height' => $image->height,
-				'href' => $image->href,
-				'format' => '', // TODO : Format
-				'name' => 'original',
-			]);
+			return $nearestFormat['href'];
 		})
 	);
 }
