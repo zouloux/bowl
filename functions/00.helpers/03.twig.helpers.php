@@ -45,13 +45,12 @@ function bowl_inject_twig_helpers ( Environment $twig ) {
 			return $nearestFormat['href'];
 		})
 	);
-	
-	$twig->getTwig()->addFilter(
-		new \Twig\TwigFilter("blurhash64", function ($blurhashArray, $punch = 1.1) {
-			//			var_dump($blurhashArray);
-			$width = $blurhashArray[0];
-			$height = $blurhashArray[1];
-			$pixels = \kornrunner\Blurhash\Blurhash::decode($blurhashArray[2], $width, $height, $punch);
+
+	$twig->addFilter(
+		new \Twig\TwigFilter("blurhash64", function ($blurHashArray, $punch = 1.1) {
+			$width = $blurHashArray[0];
+			$height = $blurHashArray[1];
+			$pixels = \kornrunner\Blurhash\Blurhash::decode($blurHashArray[2], $width, $height, $punch);
 			$image  = imagecreatetruecolor($width, $height);
 			for ($y = 0; $y < $height; ++$y) {
 				for ($x = 0; $x < $width; ++$x) {
