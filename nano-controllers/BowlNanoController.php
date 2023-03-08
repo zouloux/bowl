@@ -9,6 +9,24 @@ class BowlNanoController
 
 	public function __construct () {}
 
+	// ------------------------------------------------------------------------- LOAD DEPENDENCIES
+
+	protected bool $_areDependenciesLoaded = false;
+	function areDependenciesLoaded () { return $this->_isWordpressLoaded; }
+
+	function loadDependencies () {
+		if ($this->_areDependenciesLoaded) return;
+		$this->_areDependenciesLoaded = true;
+		// Load core and twig helpers
+		require_once __DIR__."/../common/twig.helpers.php";
+		// Inject bowl twig helpers
+		if ( Nano::$renderer instanceof \Nano\renderers\twig\TwigRenderer ) {
+			/** @var \Nano\renderers\twig\TwigRenderer $renderer */
+			$renderer = Nano::$renderer;
+			bowl_inject_twig_helpers( $renderer->getTwig() );
+		}
+	}
+
 	// ------------------------------------------------------------------------- START WORDPRESS
 
 	protected bool $_isWordpressLoaded = false;
@@ -37,13 +55,6 @@ class BowlNanoController
 				}
 				return $buffer;
 			});
-		}
-
-		// Inject bowl twig helpers
-		if ( Nano::$renderer instanceof \Nano\renderers\twig\TwigRenderer ) {
-			/** @var \Nano\renderers\twig\TwigRenderer $renderer */
-			$renderer = Nano::$renderer;
-			bowl_inject_twig_helpers( $renderer->getTwig() );
 		}
 	}
 

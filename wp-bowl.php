@@ -11,7 +11,7 @@
  * License URI:       https://opensource.org/licenses/MIT
  * Text Domain:       bowl
  * Domain Path:       /cms
- * Version:           1.2.12
+ * Version:           1.3.0
  * Copyright:         © 2022 Alexis Bouhet
  */
 
