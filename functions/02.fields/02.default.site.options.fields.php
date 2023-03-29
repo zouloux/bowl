@@ -86,7 +86,7 @@ function bowl_create_keys_filter ( string $key ) {
 
 // ----------------------------------------------------------------------------- THEME OPTIONS
 
-function brette_create_theme_options_fields_group ( string $title = "Theme options" ) {
+function bowl_create_theme_options_fields_group ( string $title = "Theme options" ) {
 	$group = new BowlGroupFields( $title );
 	$group->multiLang();
 	$group->fields([
