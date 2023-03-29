@@ -86,43 +86,38 @@ function bowl_create_keys_filter ( string $key ) {
 
 // ----------------------------------------------------------------------------- THEME OPTIONS
 
-function bowl_create_theme_options_fields_group ( string $title = "Theme options" ) {
+function brette_create_theme_options_fields_group ( string $title = "Theme options" ) {
 	$group = new BowlGroupFields( $title );
+	$group->multiLang();
 	$group->fields([
 		Text::make("Page title template", 'pageTitleTemplate')
 			->placeholder("{{site}} - {{page}}")
 			->instructions("<strong>{{site}}</strong> for site name<br><strong>{{page}}</strong> for page name."),
-		Image::make("Favicon 32", "favicon32")->instructions("32x32px, png"),
-		...bowl_create_conditional_group("Enable web-app capabilities", "webAppCapabilities", [
-			'Off' => [],
-			'On' => [
-				Text::make("App title", 'appTitle'),
-				Image::make("App icon 1024", "favicon1024")->instructions("1024x1024px, png"),
-				ColorPicker::make("App icon background color"),
-				ColorPicker::make("Theme color"),
-				ButtonGroup::make("iOS title bar color", 'iosTitleBar')
-					->choices([
-						'default' => 'Default',
-						'black' => 'Black',
-						'translucent' => 'Translucent',
-					]),
-				ButtonGroup::make("Display type", 'displayType')
-					->choices([
-						'browser' => 'Browser',
-						'fullscreen' => 'Fullscreen',
-						'color' => 'Color',
-					]),
-				ButtonGroup::make("Allowed web-app orientation", 'allowedOrientation')
-					->choices([
-						'any' => 'Any',
-						'auto' => 'Auto',
-						'portrait' => 'Portrait',
-						'landscape' => 'Landscape',
-					]),
-			]
-		])
+		Image::make("Icon 32", "icon32")
+			->instructions("Favicon<br>32x32px, png<br>For desktop"),
+		Image::make("Icon 1024", "icon1024")->instructions("1024x1024px, png")
+			->instructions("Favicon<br>1024x1024px, png<br>For mobile"),
+		Text::make(bowl_translate_label("Mobile App title"), bowl_translate_field('appTitle'))
+			->instructions("Shortcut name on mobile when added to home page."),
+		ColorPicker::make("Theme color", "appColor")
+			->instructions("Browser theme color, for desktop and mobile."),
+		ButtonGroup::make("iOS title bar color", 'iosTitleBar')
+			->choices([
+				'none' => "Not set",
+				'default' => 'Default',
+				'black' => 'Black',
+				'translucent' => 'Translucent',
+			])
 	]);
 	return $group;
+}
+
+function bowl_create_theme_filter ( $themeKey = "theme" ) {
+	return function ( $data ) use ( $themeKey ) {
+		bowl_filter_image_to_href( $data[$themeKey], "icon32" );
+		bowl_filter_image_to_href( $data[$themeKey], "icon1024" );
+		return $data;
+	};
 }
 
 // ----------------------------------------------------------------------------- MENU FIELD

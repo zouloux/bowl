@@ -9,10 +9,40 @@ use Extended\ACF\Fields\PageLink;
 use Extended\ACF\Fields\Text;
 use Extended\ACF\Fields\WysiwygEditor;
 
+// ----------------------------------------------------------------------------- MIME TYPE
+
+function bowl_get_mime ( $type, $others = [] ) {
+	if ( $type === "image" )
+		return ["jpg", "png", "jpeg", ...$others];
+	if ( $type === "svg" )
+		return ["svg"];
+	else if ( $type === "video" )
+		return ["mp4", ...$others];
+	else if ( $type === "document" )
+		return ["pdf", ...$others];
+	else
+		throw new \Exception("bowl_get_mime // Invalid type $type");
+}
+
 // ----------------------------------------------------------------------------- TITLE FIELD
 
 function bowl_create_title_field ( $label = "Title", $key = 'title' ) {
 	return Text::make( $label, $key );
+}
+
+// ----------------------------------------------------------------------------- IMAGES
+
+function bowl_create_regular_image_field ( $key = "image", $label = "Image" ) {
+	return Image::make($label, $key)
+		->wrapper(["class" => "smallImage"]);
+}
+
+function bowl_filter_image_to_href ( &$node, $imageKey ) {
+	$node[$imageKey] = (
+		( isset($node[$imageKey]) && $node[$imageKey] instanceof BowlImage )
+		? bowl_remove_base_from_href( $node[$imageKey]->href )
+		: null
+	);
 }
 
 // ----------------------------------------------------------------------------- WYSIWYG FIELD
@@ -158,3 +188,16 @@ function bowl_create_separator_layout () {
 	global $_bowlLayoutSeparatorIndex;
 	return Layout::make('', '--'.(++$_bowlLayoutSeparatorIndex));
 }
+
+// ----------------------------------------------------------------------------- INSTRUCTIONS
+
+function bowl_create_instruction_group_fields ( $fields, $richContent, $fontSize = "1.3em" ) {
+	global $bowl_create_instruction_group_fields_counter;
+	if ( !isset($bowl_create_instruction_group_fields_counter) )
+		$bowl_create_instruction_group_fields_counter = 0;
+	$bowl_create_instruction_group_fields_counter ++;
+	$fields->addGroup("instructions_".$bowl_create_instruction_group_fields_counter, " ")
+		->seamless()
+		->instructions("<p style='font-size: $fontSize'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$richContent</p>");
+}
+

@@ -122,3 +122,38 @@ function bowl_fix_translated_string ( $string ) {
 		: $string
 	);
 }
+
+/**
+ * Translate a date in French or English
+ * @param DateTime $date
+ * @param string $locale
+ * @param string $format
+ * @return array|string|string[]
+ * @throws Exception
+ */
+function bowl_format_and_translate_date ( \DateTime $date, string $locale, string $format = "j F Y" ) {
+	$postDate = $date->format( $format );
+	$translations = [
+		"en" => [
+			// Months
+			"January", "February", "March", "April", "May", "June", "July",
+			"August", "September", "October", "November", "December",
+			// Days
+			"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday",
+		],
+		"fr" => [
+			// Months
+			"Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet",
+			"Aout", "Septembre", "Octobre", "Novembre", "Décembre",
+			// Days
+			"Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche",
+		]
+	];
+	if ( $locale === "fr" )
+		return str_replace( $translations["en"], $translations["fr"], $postDate );
+	else if ( $locale === "en" )
+		return str_replace( $translations["fr"], $translations["en"], $postDate );
+	else
+		throw new \Exception("bowl_format_and_translate_date // Locale $locale is not supported.");
+}
+

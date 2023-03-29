@@ -23,3 +23,10 @@ function bowl_create_meta_fields_group ( string $title = 'SEO and share' ) {
 	]);
 	return $group;
 }
+
+function bowl_create_meta_filter ( $metaKey = "meta" ) {
+	return function ( $data ) use ( $metaKey ) {
+		bowl_filter_image_to_href( $data[$metaKey], "shareImage" );
+		return $data;
+	};
+}
