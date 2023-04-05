@@ -17,7 +17,7 @@ function bowl_get_mime ( $type, $others = [] ) {
 	if ( $type === "svg" )
 		return ["svg"];
 	else if ( $type === "video" )
-		return ["mp4", ...$others];
+		return ["mp4", "webm", ...$others];
 	else if ( $type === "document" )
 		return ["pdf", ...$others];
 	else
