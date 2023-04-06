@@ -30,27 +30,28 @@ class BowlFilters
 	 */
 	static function recursivePatchFields ( array &$data, array|bool $autoFetchPostsWithTemplate = [] ):array {
 		$locale = bowl_get_current_locale();
-		// Filter translated keys
+		// Patch translated keys
 		// Out of main loop because altering $data (otherwise node can be duplicated)
-		foreach ( $data as $key => &$node ) {
-			// Convert flexible layouts to "type"
-			if ( $key === 'acf_fc_layout' ) {
-				$data['type'] = $node;
-				unset($data[$key]);
+		// We create a new array because unsetting in loop can skip keys
+		$newData = [];
+		foreach ( $data as $key => &$value ) {
+			// Only patch string keys
+			if ( is_string($key) ) {
+				// Patch translated keys
+				if ( stripos($key, $locale.'_') === 0 ) {
+					// Convert it without locale prefix ( remove the fr_ or en_ )
+					$key = substr($key, strlen($locale) + 1);
+					// If a field with this key already exists, keep the _
+					if ( isset($data[$key]) )
+						$key = substr($key, strlen($locale));
+				}
+				// Convert flexible layouts keys to "type"
+				else if ( $key === "acf_fc_layout" )
+					$key = "type";
 			}
-			// Check translations keys
-			else if ( stripos($key, $locale.'_') === 0 ) {
-				$oldKey = $key;
-				// Convert it without locale prefix
-				$newKey = substr($key, strlen($locale) + 1);
-				// If a field with this key already exists, keep the _
-				if ( isset($data[$newKey]) )
-					$newKey = substr($key, strlen($locale));
-				// Replace value
-				$data[$newKey] = $node;
-				unset( $data[$oldKey] );
-			}
+			$newData[ $key ] = $value;
 		}
+		$data = $newData;
 		// Browse node properties
 		foreach ( $data as $key => &$node ) {
 			// Remove all data for a node when field enabled=false
