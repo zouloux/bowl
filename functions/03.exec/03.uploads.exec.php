@@ -41,7 +41,7 @@ function bowl_filter_attachment_metadata ( $file, $attachmentID, $context ) {
 	// Compute uploaded file path and upload dir path
 	$uploadDir   = wp_upload_dir();
 	$uploadDirPath = rtrim($uploadDir['basedir'],'/').'/';
-	$uploadDirPathWithDate = rtrim($uploadDir['path'],'/').'/';
+	$uploadDirWithDate = $uploadDirPath.pathinfo($file["file"])["dirname"]."/";
 	$imagePath = $uploadDirPath.$file['file'];
 	// Get image quality from settings
 	$imageQuality = intval(
@@ -80,7 +80,7 @@ function bowl_filter_attachment_metadata ( $file, $attachmentID, $context ) {
 				imagecopyresampled($imageCopy, $gdImage, 0, 0, 0, 0, $w, $h, $uploadedWidth, $uploadedHeight);
 				// Convert to webp
 				$fileName = pathinfo($value['file'], PATHINFO_FILENAME);
-				$fullPath = $uploadDirPathWithDate.$fileName.'.webp';
+				$fullPath = $uploadDirWithDate.$fileName.'.webp';
 				imagewebp( $imageCopy, $fullPath, $imageQuality );
 				// Destroy copied image
 				imagedestroy($imageCopy);
