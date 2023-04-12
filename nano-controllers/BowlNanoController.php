@@ -108,6 +108,7 @@ class BowlNanoController
 	// ------------------------------------------------------------------------- WEBSITE RESPONDERS
 
 	function printRobots () {
+		$this->loadWordpress();
 		$allow = !!get_option( 'blog_public' );
 		Nano::action("Website", "printRobots", [
 			$allow ? ['*'] : [],
@@ -116,6 +117,7 @@ class BowlNanoController
 	}
 
 	function printSitemap ( $postTypes = ["page", "posts"], callable $filterPages = null ) {
+		$this->loadWordpress();
 		// TODO : Check if post exists in other languages
 		// TODO : Add pages with other locales
 		// TODO : Split in sub-sitemaps for performances, 1 by post-type
