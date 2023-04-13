@@ -207,12 +207,15 @@ add_filter("admin_body_class", function ($classes) {
 
 // ----------------------------------------------------------------------------- TOP BUTTONS
 
-if ( defined('BOWL_ADMIN_ANALYTICS_LINK') ) {
+if ( defined('BOWL_ADMIN_ANALYTICS_BUTTON') ) {
 	add_action('admin_bar_menu', function ($adminBar) {
+		$href = call_user_func(BOWL_ADMIN_ANALYTICS_BUTTON);
+		if ( $href === false )
+			return;
 		$adminBar->add_node([
 			'id' => 'open-analytics',
 			'title' => 'Open Analytics',
-			'href' => BOWL_ADMIN_ANALYTICS_LINK,
+			'href' => $href,
 			'meta' => [ 'class' => 'open-analytics-top-button' ]
 		]);
 	}, 40);
@@ -220,7 +223,6 @@ if ( defined('BOWL_ADMIN_ANALYTICS_LINK') ) {
 
 if ( defined('BOWL_ADMIN_CLEAR_CACHE_BUTTON') ) {
 	$_bowlClearCacheParam = "clear-bowl-cache";
-
 	add_action('admin_bar_menu', function ( $adminBar ) use ( $_bowlClearCacheParam ) {
 		$adminBar->add_node([
 			'id' => 'clear-cache',
@@ -232,7 +234,6 @@ if ( defined('BOWL_ADMIN_CLEAR_CACHE_BUTTON') ) {
 					'event.preventDefault();',
 					'fetch(location.pathname + "?'.$_bowlClearCacheParam.'=1")',
 					'.then( async r => alert(await r.text()));',
-					'',
 				])
 			]
 		]);
