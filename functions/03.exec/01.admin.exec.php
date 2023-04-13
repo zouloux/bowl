@@ -188,15 +188,15 @@ add_action( 'customize_register', function ( $wp_customize ) {
 			$wp_customize->remove_section( $sectionName );
 }, 30);
 
+
+function bowl_clear_nano_cache () {
+	if ( class_exists("\Nano\core\Nano") )
+		\Nano\core\Nano::cacheClear();
+}
+
 // Clear Nano APCU cache on post and options saving
-add_action( 'save_post', function () {
-	if ( class_exists("\Nano\core\Nano") )
-		\Nano\core\Nano::cacheClear();
-}, 0);
-add_action( 'updated_option', function () {
-	if ( class_exists("\Nano\core\Nano") )
-		\Nano\core\Nano::cacheClear();
-}, 0);
+add_action( 'save_post', "bowl_clear_nano_cache", 0);
+add_action( 'updated_option', "bowl_clear_nano_cache", 0);
 
 // Add a class to offset screen-meta if we have multilang plugin
 add_filter("admin_body_class", function ($classes) {
@@ -204,3 +204,48 @@ add_filter("admin_body_class", function ($classes) {
 		$classes .= " has-wpm-plugin";
 	return $classes;
 });
+
+// ----------------------------------------------------------------------------- TOP BUTTONS
+
+if ( defined('BOWL_ADMIN_ANALYTICS_LINK') ) {
+	add_action('admin_bar_menu', function ($adminBar) {
+		$adminBar->add_node([
+			'id' => 'open-analytics',
+			'title' => 'Open Analytics',
+			'href' => BOWL_ADMIN_ANALYTICS_LINK,
+			'meta' => [ 'class' => 'open-analytics-top-button' ]
+		]);
+	}, 40);
+}
+
+if ( defined('BOWL_ADMIN_CLEAR_CACHE_BUTTON') ) {
+	$_bowlClearCacheParam = "clear-bowl-cache";
+
+	add_action('admin_bar_menu', function ( $adminBar ) use ( $_bowlClearCacheParam ) {
+		$adminBar->add_node([
+			'id' => 'clear-cache',
+			'title' => 'Clear cache',
+			'meta' => [
+				'class' => 'clear-cache-top-button',
+				'onclick' => implode("", [
+					'if (!confirm("Are you sure ?")) return false;',
+					'event.preventDefault();',
+					'fetch(location.pathname + "?'.$_bowlClearCacheParam.'=1")',
+					'.then( async r => alert(await r.text()));',
+					'',
+				])
+			]
+		]);
+	}, 50);
+
+	if ( isset($_GET[$_bowlClearCacheParam]) && $_GET[$_bowlClearCacheParam] === "1" ) {
+		if ( is_admin() ) {
+			if ( BOWL_ADMIN_CLEAR_CACHE_BUTTON === true )
+				bowl_clear_nano_cache();
+			else
+				call_user_func( BOWL_ADMIN_CLEAR_CACHE_BUTTON );
+			echo "Done";
+			exit;
+		}
+	}
+}

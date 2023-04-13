@@ -104,7 +104,7 @@ class BowlNanoController
 		// TODO : Check cookie for user selected locale
 		return $locale;
 	}
-	
+
 	function checkLocale ( $locale ) {
 		$localeData = $this->getCachedLocaleData();
 		$localeKeys = array_keys( $localeData['languages'] );

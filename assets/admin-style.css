@@ -546,3 +546,15 @@ body.wp-admin #wpcontent {
   height: 100px !important;
   min-height: 100px !important;
 }
+
+/* Top buttons */
+.open-analytics-top-button > a:before {
+  display: block;
+  content: "\f226";
+  top: 2px;
+}
+.clear-cache-top-button > a:before {
+  display: block;
+  content: "\f182";
+  top: 2px;
+}
