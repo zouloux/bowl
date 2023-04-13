@@ -3,7 +3,6 @@
 use Extended\ACF\Fields\Accordion;
 use Extended\ACF\Fields\ButtonGroup;
 use Extended\ACF\Fields\ColorPicker;
-use Extended\ACF\Fields\Image;
 use Extended\ACF\Fields\Repeater;
 use Extended\ACF\Fields\Text;
 
@@ -93,9 +92,9 @@ function bowl_create_theme_options_fields_group ( string $title = "Theme options
 		Text::make("Page title template", 'pageTitleTemplate')
 			->placeholder("{{site}} - {{page}}")
 			->instructions("<strong>{{site}}</strong> for site name<br><strong>{{page}}</strong> for page name."),
-		Image::make("Icon 32", "icon32")
+		bowl_create_image_field("Icon 32", "icon32", "microImage")
 			->instructions("Favicon<br>32x32px, png<br>For desktop"),
-		Image::make("Icon 1024", "icon1024")->instructions("1024x1024px, png")
+		bowl_create_image_field("Icon 1024", "icon1024")
 			->instructions("Favicon<br>1024x1024px, png<br>For mobile"),
 		Text::make(bowl_translate_label("Mobile App title"), bowl_translate_field('appTitle'))
 			->instructions("Shortcut name on mobile when added to home page."),

@@ -174,8 +174,14 @@ html body {
 }
 
 /* Small image preview */
+.acf-field.medium img {
+  width: 320px;
+}
 .acf-field.smallImage img {
   width: 200px;
+}
+.acf-field.microImage img {
+  width: 64px;
 }
 
 .acf-field.columns-group > .acf-input > .acf-fields

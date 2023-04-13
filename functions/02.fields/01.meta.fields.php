@@ -18,7 +18,7 @@ function bowl_create_meta_fields_group ( string $title = 'SEO and share' ) {
 		Textarea::make(bowl_translate_label("Share description"), bowl_translate_field('shareDescription'))
 			->rows(3)
 			->instructions("For Facebook and Twitter share.<br>Will use meta description by default."),
-		Image::make("Share image", 'shareImage')
+		bowl_create_image_field("Share image", 'shareImage')
 			->instructions("For Facebook and Twitter"),
 	]);
 	return $group;
