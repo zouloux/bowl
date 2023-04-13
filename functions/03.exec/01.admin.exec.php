@@ -227,6 +227,7 @@ if ( defined('BOWL_ADMIN_CLEAR_CACHE_BUTTON') ) {
 		$adminBar->add_node([
 			'id' => 'clear-cache',
 			'title' => 'Clear cache',
+			'href' => '-',
 			'meta' => [
 				'class' => 'clear-cache-top-button',
 				'onclick' => implode("", [
