@@ -95,10 +95,12 @@ class BowlNanoController
 	function getUserLocale () {
 		$localesData = $this->getCachedLocaleData();
 		$allLocales = array_keys( $localesData['languages'] );
-		// Get user locale
-		$browserLocale = strtolower( substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2) );
 		// FIXME : Parse all user locales and order them
 		$locale = $localesData["default"];
+		if ( !isset($_SERVER["HTTP_ACCEPT_LANGUAGE"]) )
+			return $locale;
+		// Get user locale
+		$browserLocale = strtolower( substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2) );
 		if ( in_array($browserLocale, $allLocales) )
 			$locale = $browserLocale;
 		// TODO : Check cookie for user selected locale
