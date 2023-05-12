@@ -41,20 +41,28 @@ class BowlNanoController
 		$this->_isWordpressLoaded = true;
 		// Enable WP query profiling
 		if ( Nano::getEnv("NANO_DEBUG") && Nano::getEnv("NANO_PROFILE", false) ) {
-			define('SAVEQUERIES', true);
-			NanoDebug::addCustomTab("WP Queries", function () {
-				global $wpdb;
-				if (!$wpdb->queries) return "";
-				$total = count($wpdb->queries);
-				$buffer = "<h2>Total queries: $total</h2>";
-				foreach ( $wpdb->queries as $query ) {
-					$initiator = implode(" < ", array_reverse(explode(",", $query[2])));
-					$queryContent = NanoDebug::dumpToString($query[0]);
-					$buffer .= "<h3 class='DebugBar_dumpTitle'>$initiator</h3>";
-					$buffer .= "<div class=''>$queryContent</div>";
-				}
-				return $buffer;
-			});
+			$debugEnvEnabled = Nano::getEnv("NANO_DEBUG_ENV", false);
+			if ( !$debugEnvEnabled ) {
+				NanoDebug::addCustomTab("WP Queries", function () {
+					return "<h3 class='DebugBar_dumpTitle'>NANO_DEBUG_ENV needs to be enabled</h3>";
+				});
+			}
+			else {
+				define('SAVEQUERIES', true);
+				NanoDebug::addCustomTab("WP Queries", function () {
+					global $wpdb;
+					if (!$wpdb->queries) return "";
+					$total = count($wpdb->queries);
+					$buffer = "<h2>Total queries: $total</h2>";
+					foreach ( $wpdb->queries as $query ) {
+						$initiator = implode(" < ", array_reverse(explode(",", $query[2])));
+						$queryContent = NanoDebug::dumpToString($query[0]);
+						$buffer .= "<h3 class='DebugBar_dumpTitle'>$initiator</h3>";
+						$buffer .= "<div class=''>$queryContent</div>";
+					}
+					return $buffer;
+				});
+			}
 		}
 	}
 
