@@ -1,7 +1,7 @@
 <?php
 
 function bowl_get_base ():string {
-	return rtrim(env('WP_URL'), '/') . '/';
+	return rtrim(env('WP_URL') ?? "", '/') . '/';
 }
 
 // FIXME : Does not work well with local added two times depending on WPM config
