@@ -53,7 +53,7 @@ JS;
 	}
 	// Show title
 	else
-		bowl_inject_custom_admin_resource_for_screen( null, "${titleClass} { opacity: 1; } ");
+		bowl_inject_custom_admin_resource_for_screen( null, "$titleClass { opacity: 1; } ");
 }
 
 // ----------------------------------------------------------------------------- EDITOR & EXCERPT

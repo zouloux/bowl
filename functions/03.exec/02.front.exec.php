@@ -38,7 +38,7 @@ add_filter( 'robots_txt', function ($output, $public) {
 			"User-agent: *",
 		], $isPublic ? [
 			"Allow: *",
-			"Sitemap: ${base}wp-sitemap.xml"
+			"Sitemap: {$base}wp-sitemap.xml"
 		] : [
 			"Disallow: *",
 		])
