@@ -125,7 +125,7 @@ function bowl_filter_attachment_metadata ( $file, $attachmentID, $context ) {
 	// Silently fail into php logs
 	catch ( Exception $e ) {
 		$encodedError = json_encode($e);
-		error_log("Unable to encode ${imagePath} to webp or generate blurhash. ${$encodedError}");
+		error_log("Unable to encode $imagePath to webp or generate blurhash. $encodedError");
 	}
 	// Destroy pending source gd image
 	if ( isset($gdImage) && function_exists('imagedestroy' ))

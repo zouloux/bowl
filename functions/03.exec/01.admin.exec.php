@@ -124,27 +124,27 @@ if ( defined('BOWL_ADD_IMAGE_META_BOX') && BOWL_ADD_IMAGE_META_BOX ) {
 add_action('add_meta_boxes', function () {
 	global $wp_meta_boxes;
 	//dump($wp_meta_boxes);exit;
-	foreach ( $wp_meta_boxes as $key => $value ) {
+	foreach ( $wp_meta_boxes as $value ) {
 		// Move excerpt on size
 		if ( defined('BOWL_EXCERPT_META_BOX_ON_SIDE') && BOWL_EXCERPT_META_BOX_ON_SIDE ) {
-			if ( isset($wp_meta_boxes[ $key ]['normal']['core']['postexcerpt']) ) {
-				$wp_meta_boxes[ $key ]['side']['core']['postexcerpt'] = $wp_meta_boxes[ $key ]['normal']['core']['postexcerpt'];
-				unset($wp_meta_boxes[ $key ]['normal']['core']['postexcerpt']);
+			if ( isset($value['normal']['core']['postexcerpt']) ) {
+				$value['side']['core']['postexcerpt'] = $value['normal']['core']['postexcerpt'];
+				unset($value['normal']['core']['postexcerpt']);
 			}
 		}
 		// Move author meta box on side
 		if ( defined('BOWL_AUTHOR_META_BOX_ON_SIDE') && BOWL_AUTHOR_META_BOX_ON_SIDE ) {
-			if ( isset($wp_meta_boxes[ $key ]['normal']['core']['authordiv']) ) {
-				$wp_meta_boxes[ $key ]['side']['core']['authordiv'] = $wp_meta_boxes[ $key ]['normal']['core']['authordiv'];
-				unset($wp_meta_boxes[ $key ]['normal']['core']['authordiv']);
+			if ( isset($value['normal']['core']['authordiv']) ) {
+				$value['side']['core']['authordiv'] = $value['normal']['core']['authordiv'];
+				unset($value['normal']['core']['authordiv']);
 			}
 		}
 		// Remove tags box
 		if ( defined('BOWL_DISABLE_TAGS') && BOWL_DISABLE_TAGS )
-			unset($wp_meta_boxes[ $key ]['side']['core']['tagsdiv-post_tag']);
+			unset($value['side']['core']['tagsdiv-post_tag']);
 		// Remove slug box
 		if ( defined('BOWL_DISABLE_SLUG') && BOWL_DISABLE_SLUG )
-			unset($wp_meta_boxes[ $key ]['normal']['core']['slugdiv']);
+			unset($value['normal']['core']['slugdiv']);
 	}
 }, 0);
 
