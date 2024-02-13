@@ -564,3 +564,9 @@ body.wp-admin #wpcontent {
   content: "\f182";
   top: 2px;
 }
+
+
+/* Repeater with no re-order possible ( dictionaries ) */
+.no-reorder > .acf-input > .acf-repeater > .acf-table > tbody > .acf-row > .acf-row-handle {
+  display: none;
+}

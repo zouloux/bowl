@@ -13,6 +13,7 @@ function bowl_create_dictionaries_fields_group ( string $title = "Dictionaries" 
 	$group->rawFields()->multiLang();
 	$group->fields([
 		Repeater::make(' ', 'dictionaries')
+			->wrapper(["class" => "no-reorder"])
 			->buttonLabel("Add dictionary")
 			->layout('row')
 			->fields([

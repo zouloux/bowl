@@ -6,7 +6,7 @@ function patchFlexibleBehavior ( $ ) {
     var opened = true;
     var collapsedClass = '-collapsed';
     $(el)
-      .text( $(el).text() + " ↕️" )
+      .html( $(el).html() + " ↕️" )
       .on('click', function (e) {
         var $layouts = $(e.currentTarget).parent().parent().find('.values > .layout');
         opened = !opened;
